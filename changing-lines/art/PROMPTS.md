@@ -12,6 +12,56 @@ The game draws its own art in code. To use painted art instead, generate (or com
 - Card art: 1000×720 px (ratio 100:72), the subject centred, leaving the lower-right corner calm (the hexagram seal sits there).
 - Fighters: transparent PNG/WebP, 600×800 px, full body, **facing right**, feet near the bottom edge (opponents are mirrored in game).
 
+## Where to put the files on GitHub
+
+Repository: **https://github.com/Antgu/personalRepo**, branch **`ccr-ff936230-ougcdb`** (the branch the game lives on; use `main` instead once it has been merged).
+
+| What | Folder in the repo | File name | Manifest key |
+|---|---|---|---|
+| Card and weapon art | `changing-lines/art/cards/` | the key after `card:`, e.g. `dragon.webp`, `jian.webp` | `"card:dragon": "art/cards/dragon.webp"` |
+| Fighters | `changing-lines/art/fighters/` | the key after `fighter:`, e.g. `hero.png` | `"fighter:hero": "art/fighters/hero.png"` |
+| Manifest | `changing-lines/art/manifest.json` | (already exists, starts as `{}`) | one line per image |
+
+Rules:
+- Name each file exactly after its key in the tables below (lowercase, as written, e.g. `returnFist.webp`, `f_spring.webp`, `s_jian.webp`).
+- Paths in the manifest are relative to `changing-lines/`, so they start with `art/…`, not `changing-lines/art/…`.
+- Prefer `.webp` (or `.png` for fighters with transparency). Keep each image under about 400 KB; a full set should stay well under 20 MB.
+- You don't need the whole set at once. Any image you leave out keeps the drawn art.
+
+### Upload in the browser (no git needed)
+
+1. Open https://github.com/Antgu/personalRepo/tree/ccr-ff936230-ougcdb/changing-lines/art
+2. **Add file → Upload files**. To create the subfolder, drag in a folder named `cards` (or `fighters`) containing the images; GitHub keeps the folder name.
+3. Commit directly to `ccr-ff936230-ougcdb`.
+4. Open `manifest.json` in the same folder, click the pencil icon, add one line per image, and commit. For example:
+
+```json
+{
+  "card:dragon": "art/cards/dragon.webp",
+  "card:guard": "art/cards/guard.webp",
+  "fighter:hero": "art/fighters/hero.png"
+}
+```
+
+(Every line except the last ends with a comma.)
+
+### Or with git
+
+```bash
+git clone https://github.com/Antgu/personalRepo.git
+cd personalRepo
+git checkout ccr-ff936230-ougcdb
+mkdir -p changing-lines/art/cards changing-lines/art/fighters
+# copy your images into those folders, then edit changing-lines/art/manifest.json
+git add changing-lines/art
+git commit -m "Add painted art for Changing Lines"
+git push origin ccr-ff936230-ougcdb
+```
+
+### After pushing
+
+The published game page does not read from GitHub by itself. Once the images are pushed, ask Claude to "republish Changing Lines with the new art": it pulls the branch, checks the manifest against the files, and publishes the images with the page. To preview locally, run `npx serve changing-lines` from the repo root and open the address it prints (opening `index.html` directly as a file won't load the manifest).
+
 ## Shared style line (append to every prompt)
 
 > Style: Chinese fantasy (guofeng) digital watercolour illustration. Pale, luminous off-white background with soft blooms of pink and crimson wash; flowing translucent silk ribbons and sleeves in crimson and blush; scattered falling red petals; fine gold filigree lines; delicate ink linework on faces and hands; painterly, airy, high detail, dynamic diagonal composition, no text, no border, no watermark.
