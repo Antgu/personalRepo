@@ -10,7 +10,7 @@ The game draws its own art in code. To use painted art instead, generate (or com
 ```
 
 - Card art: 1000×720 px (ratio 100:72), the subject centred, leaving the lower-right corner calm (the hexagram seal sits there).
-- Fighters: transparent PNG/WebP, 600×800 px, full body, **facing right**, feet near the bottom edge (opponents are mirrored in game).
+- Fighters: transparent PNG/WebP, 600×800 px, full body, **facing right**, feet near the bottom edge (opponents are mirrored in game). Ask for a clean, readable silhouette on a plain white background and keep the mist and splatter inside the figure, so it cuts out cleanly; save the misty landscape for card art.
 
 ## Where to put the files on GitHub
 
@@ -64,17 +64,17 @@ The published game page does not read from GitHub by itself. Once the images are
 
 ## Shared style line (append to every prompt)
 
-> Style: Chinese fantasy (guofeng) digital watercolour illustration. Pale, luminous off-white background with soft blooms of pink and crimson wash; flowing translucent silk ribbons and sleeves in crimson and blush; scattered falling red petals; fine gold filigree lines; delicate ink linework on faces and hands; painterly, airy, high detail, dynamic diagonal composition, no text, no border, no watermark.
+> Style: Chinese ink-wash (shuimo, xieyi) painting on pale rice paper. Mostly black and grey ink in loose wet and dry-brush strokes; forms dissolving into mist and white negative space; wind-swept hair, cloth, grass and leaves; colour used sparingly as soft washes and spot accents (one or two per image, e.g. vermilion, indigo, ochre, jade or pale gold), never a full-colour painting; sparse, expressive, high contrast, dynamic diagonal composition, no text, no seal, no border, no watermark.
 
 ## Fighters
 
 | Key | Prompt |
 |---|---|
-| `fighter:hero` | The Wanderer, a young swordswoman in flowing blush and crimson hanfu with long silk ribbons, high ponytail with a red ribbon, poised in a wide martial stance holding a weapon forward |
-| `fighter:shen` | Disciple Shen of the Stone Gate Hall, a bald young monk in grey-beige robes and prayer beads, holding a long wooden staff, steady stance |
-| `fighter:lei` | Adept Lei of the Thunder Step Sect, lavender and indigo robes, gold headband with trailing tails, twin hook swords, crackling light at the feet |
-| `fighter:hua` | Lantern Keeper Hua of the Crimson Lantern Society, peach and amber robes, an open painted iron fan, red paper lanterns glowing behind |
-| `fighter:master` | The Master of Changes, white and silver robes, a wide straw hat with a sheer white veil, a straight sword, a pale golden aura and a faint taiji moon |
+| `fighter:hero` | The Wanderer, a young swordswoman in dark ink robes with a crimson sash and long crimson silk ribbons, high ponytail tied with a red ribbon, poised in a wide martial stance holding a weapon forward |
+| `fighter:shen` | Disciple Shen of the Stone Gate Hall, a bald young monk in grey robes washed with ochre, dark prayer beads, holding a long wooden staff, steady rooted stance |
+| `fighter:lei` | Adept Lei of the Thunder Step Sect, ink robes washed with indigo and violet, a headband with trailing tails, twin hook swords, a flicker of pale violet lightning at the feet |
+| `fighter:hua` | Lantern Keeper Hua of the Crimson Lantern Society, ink robes with amber and peach washes, an open painted iron fan, the warm glow of red paper lanterns behind |
+| `fighter:master` | The Master of Changes, pale robes in light grey wash, a wide straw hat with a sheer veil, a straight sword, a faint pale-gold aura and a taiji moon |
 
 ## Cards
 
