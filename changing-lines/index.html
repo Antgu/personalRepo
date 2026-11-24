@@ -142,6 +142,9 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--gold);outl
 
 /* hand */
 .hand{display:flex;gap:6px;overflow-x:auto;padding:12px 2px 4px;scrollbar-width:thin}
+.hand.withnext{padding-bottom:14px}
+.card .next{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);font-size:9.5px;font-weight:700;letter-spacing:.02em;color:#fff;background:var(--tc);border:1.5px solid var(--ink);border-radius:4px;padding:0 4px;white-space:nowrap;z-index:1}
+.card .next.no{opacity:.55;text-decoration:line-through}
 .card{flex:0 0 calc((100% - 28px)/5);min-width:62px;background:var(--paper);color:var(--paper-ink);border-radius:6px;padding:3px 3px 5px;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;border:2px solid transparent;transition:transform .15s;box-shadow:0 2px 6px #0006}
 .card .art{width:100%;display:block;border-radius:3px}
 .card.sel{border-color:var(--gold);transform:translateY(-8px)}
@@ -272,6 +275,12 @@ th{color:var(--mute);font-weight:600;text-transform:uppercase;font-size:12px;let
 
 <div id="app"></div>
 <div id="modal"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <filter id="cl-brush" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".3" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.5" xChannelSelector="R" yChannelSelector="G"/></filter>
+  <filter id="cl-wash" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.8"/></filter>
+  <filter id="cl-silk" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".35 1.1" numOctaves="2" seed="9"/><feColorMatrix type="matrix" values="0 0 0 0 .32  0 0 0 0 .24  0 0 0 0 .13  0 0 0 -1.2 .85"/></filter>
+  <radialGradient id="cl-vig" cx=".5" cy=".5" r=".72"><stop offset=".6" stop-color="#5e4630" stop-opacity="0"/><stop offset="1" stop-color="#5e4630" stop-opacity=".38"/></radialGradient>
+</defs></svg>
 
 <script>
 /* ======================= Hexagram data ======================= */
@@ -286,8 +295,10 @@ const pop=x=>{let k=0;while(x){k+=x&1;x>>=1}return k};
 const rev=b=>{let r=0;for(let i=0;i<6;i++)if(b>>i&1)r|=1<<(5-i);return r};
 
 /* ======================= Ink art ======================= */
-const INK='#231d17',RED='#b33a26',GOLD='#c4952f',PAPER='#f1e8d4',STEEL='#7f8a93',WOOD='#6b4a2b',LEAF='#3f5e3b',WATER='#2d5f8a';
-const TCOL={7:'#efe0ad',0:'#d2b688',1:'#b9acd9',2:'#8db0d3',4:'#adb9a5',6:'#b0d0a0',5:'#eaa588',3:'#98cfc7'};
+const INK='#1f1a15',RED='#a3382a',GOLD='#b08a3e',PAPER='#efe2c4',STEEL='#6f7a80',WOOD='#5e4630',LEAF='#4f7a5e',WATER='#3d5f86';
+const TCOL={7:'#d4b66a',0:'#a5814f',1:'#8a7a9e',2:'#3d5f86',4:'#4f7a5e',6:'#7f9f6e',5:'#b5523a',3:'#5f9a93'};
+// distant ink-wash ranges (shanshui), picked by the upper trigram
+const FAR=['M0 50 C8 40 12 22 20 26 C26 30 28 44 34 40 C40 34 42 14 52 16 C60 18 60 38 66 36 C72 34 76 24 84 28 C92 32 94 44 100 42 V72 H0Z','M0 46 C10 44 14 30 24 32 C32 34 34 46 42 44 C50 40 56 20 66 22 C76 24 80 40 88 38 C94 36 96 30 100 30 V72 H0Z','M0 40 C6 30 14 10 22 14 C28 18 26 36 32 38 C40 40 46 30 54 32 C62 34 66 48 74 44 C82 40 86 18 94 20 C98 22 100 30 100 34 V72 H0Z'];
 const HORIZON={
   7:`<path d="M0 64 Q12 55 24 63 T48 63 T72 63 T100 62 V72 H0Z" stroke="none"/>`,
   0:`<path d="M0 61 Q50 57 100 61 V72 H0Z" stroke="none"/>`,
@@ -358,9 +369,20 @@ let artN=0;
 function art(motif,hex,cls='art'){
   const b=BITS[hex],lo=b&7,up=b>>3,id='ga'+(++artN);
   const m=MOTIF[motif]?MOTIF[motif]():(W[motif]||'');
-  return `<svg class="${cls}" viewBox="0 0 100 72" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${TCOL[up]}"/><stop offset="1" stop-color="${TCOL[lo]}"/></linearGradient></defs>
-  <rect width="100" height="72" fill="url(#${id})"/><g opacity=".3" fill="${INK}" stroke="${INK}">${HORIZON[lo]}</g>
-  <g fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${m}</g></svg>`;
+  const seal=(hz(hex)||'')[0];
+  return `<svg class="${cls}" viewBox="0 0 100 72" aria-hidden="true"><defs>
+  <linearGradient id="${id}u" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${TCOL[up]}" stop-opacity=".42"/><stop offset=".6" stop-color="${TCOL[up]}" stop-opacity="0"/></linearGradient>
+  <linearGradient id="${id}l" x1="0" y1="0" x2="0" y2="1"><stop offset=".45" stop-color="${TCOL[lo]}" stop-opacity="0"/><stop offset="1" stop-color="${TCOL[lo]}" stop-opacity=".45"/></linearGradient></defs>
+  <rect width="100" height="72" fill="#e2cd9f"/>
+  <rect width="100" height="72" fill="url(#${id}u)"/><rect width="100" height="72" fill="url(#${id}l)"/>
+  <rect width="100" height="72" filter="url(#cl-silk)" opacity=".22"/>
+  <path d="${FAR[up%3]}" fill="#2a2620" opacity=".2" filter="url(#cl-wash)"/>
+  <rect x="-5" y="38" width="110" height="10" fill="#f2e6c8" opacity=".55" filter="url(#cl-wash)"/>
+  <g opacity=".42" fill="${INK}" stroke="${INK}" filter="url(#cl-brush)">${HORIZON[lo]}</g>
+  <g fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" filter="url(#cl-brush)" opacity=".93">${m}</g>
+  <rect width="100" height="72" fill="url(#cl-vig)"/>
+  <rect x="1.5" y="1.5" width="97" height="69" fill="none" stroke="#5e4630" stroke-opacity=".4" stroke-width=".7"/>
+  <g transform="translate(86 58)" opacity=".88"><rect width="10" height="10" rx="1" fill="#b0302a"/><text x="5" y="8" font-size="8" text-anchor="middle" fill="#f3e6cc" font-family="Ma Shan Zheng,KaiTi,STKaiti,serif">${seal}</text></g></svg>`;
 }
 
 /* ======================= Fighters ======================= */
@@ -866,7 +888,7 @@ function flushFloats(){
   });
 }
 function roadHTML(){return `<div class="road" aria-label="Journey">${FOES.map((f,i)=>`<span class="${i<G.fight?'done':i===G.fight?'now':''}" title="${f.school}">${f.glyph}</span>`).join('')}</div>`}
-function topHTML(){return `<div class="top">${roadHTML()}<span class="sp"></span><span class="taels">${G.taels} 兩</span>
+function topHTML(){return `<div class="top">${roadHTML()}<span class="sp"></span>
   <button class="iconbtn" data-act="m:rules">Rules</button><button class="iconbtn" data-act="m:manual">Forms</button><button class="iconbtn" data-act="m:bag">Bag</button><button class="iconbtn" data-act="m:deck">Deck</button></div>`}
 
 function renderTitle(){
@@ -911,7 +933,12 @@ function renderCombat(){
   const c=G.c,f=c.foe,m=curMove(),fb=BITS[m.hex],comp=NUM[fb^63];
   const sel=UI.sel!=null?c.hand[UI.sel]:null;
   let chg=0,tr=null,info=null;
-  if(sel){const b=BITS[sel.hex];tr=classify(c.stance,b);chg=c.stance^b;info=trInfo(tr,sel)}
+  let nx=null;
+  if(sel){const b=BITS[sel.hex];tr=classify(c.stance,b);chg=c.stance^b;info=trInfo(tr,sel);
+    let q=c.qi-effCost(sel,tr);
+    if(tr.type==='flow'){if(lineFx(tr.line,tr.dir).name==='Surge')q++;if(G.bag.weapon==='hooks'&&!c.hookUsed)q++}
+    if(sel.id==='decrease')q++;
+    nx={bits:b,qi:q}}
   const stanceNum=NUM[c.stance];
   const qiPips=Array.from({length:Math.max(3,c.qi)},(_,i)=>`<i class="${i<c.qi?'f':''}"></i>`).join('');
   const balPct=50+c.balance/12*50;
@@ -935,7 +962,7 @@ function renderCombat(){
       <div class="pv-text">${def.text}</div>
       <div class="tr ${info.cls}">${info.label}<span>${info.desc}</span></div>
       ${extras.map(e=>`<div class="extra">${e}</div>`).join('')}
-      <div class="pv-row"><span class="mute" style="font-size:13px">${cost} Qi${cost!==costOf(sel)?` (base ${costOf(sel)})`:''}</span><button class="btn primary" data-act="play" ${can?'':'disabled'}>${c.qi<cost?'Not enough Qi':'Play'}</button></div></div>`;
+      <div class="pv-row"><span class="mute" style="font-size:13px">${cost} Qi${cost!==costOf(sel)?` (base ${costOf(sel)})`:''} · leaves ${Math.max(0,nx.qi)} Qi. Other cards show their cost after this one.</span><button class="btn primary" data-act="play" ${can?'':'disabled'}>${c.qi<cost?'Not enough Qi':'Play'}</button></div></div>`;
   }else pv=`<div class="hint">${c.log||'Tap a technique to see how it moves from your stance.'}</div>`;
 
   const pouch=[0,1,2].map(i=>{const id=G.bag.items[i];if(!id)return `<span class="itm empty"></span>`;const it=CONSUM[id];
@@ -975,11 +1002,14 @@ function renderCombat(){
     </div>
   </section>
   <section class="preview" aria-live="polite">${pv}</section>
-  <section class="hand">${c.hand.map((h,i)=>{
+  <section class="hand ${nx?'withnext':''}">${c.hand.map((h,i)=>{
       const t=classify(c.stance,BITS[h.hex]),ti=trInfo(t,h),ec=effCost(h,t),base=costOf(h);
+      let nxt='';
+      if(nx&&i!==UI.sel){const t2=classify(nx.bits,BITS[h.hex]),ti2=trInfo(t2,h),ec2=effCost(h,t2);
+        nxt=`<span class="next ${ti2.cls} ${ec2>nx.qi?'no':''}" title="If played after ${CARDS[sel.id].name}">then ${ec2} · ${ti2.short}</span>`}
       return `<button class="card ${ti.cls} ${UI.sel===i?'sel':''} ${c.qi<ec?'na':''} ${h.temp?'temp':''} ${h.sig?'sig':''}" data-act="sel" data-i="${i}">
         <span class="cost ${ec<base?'down':ec>base?'up':''}">${ec}</span><span class="badge">${ti.short}</span>
-        ${art(h.id,h.hex)}<span class="nm">${CARDS[h.id].name}</span><span class="hn">${hexHTML(BITS[h.hex],'xs')}<span class="zh">${hz(h.hex)}</span>${h.hex}</span></button>`}).join('')||'<div class="mute" style="padding:20px">Your hands are empty.</div>'}</section>
+        ${art(h.id,h.hex)}<span class="nm">${CARDS[h.id].name}</span><span class="hn">${hexHTML(BITS[h.hex],'xs')}<span class="zh">${hz(h.hex)}</span>${h.hex}</span>${nxt}</button>`}).join('')||'<div class="mute" style="padding:20px">Your hands are empty.</div>'}</section>
   <div class="actions">
     <button class="btn ${UI.shift?'on':''}" data-act="shift" ${c.shiftUsed||c.qi<1||c.busy?'disabled':''}>Shift · 1 Qi</button>
     <div class="pouch" aria-label="Pouch">${pouch}</div>
@@ -1021,7 +1051,7 @@ function renderRest(){
       <button class="btn" data-act="cult">Cultivate<small>Flip one line of a technique's hexagram, then set out. The move keeps its effect but links to different cards.</small></button>
       <button class="btn" data-act="m:bag">Open your bag<small>Change weapon or talisman before the next duel.</small></button>
     </div>
-    <h3>Wandering merchant</h3>
+    <h3>Wandering merchant <span class="taels">· you carry ${G.taels} 兩</span></h3>
     <div class="choice">${shop}</div></div>`;
 }
 function renderCult(){
