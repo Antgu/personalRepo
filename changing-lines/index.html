@@ -231,6 +231,35 @@ th{color:var(--mute);font-weight:600;text-transform:uppercase;font-size:12px;let
 .form .step .zh{font-size:16px}
 .form.done{outline:1px solid var(--gold)}
 .bagtop{display:flex;gap:12px;align-items:center}
+.tabs{display:flex;gap:6px}
+.tabs .btn{flex:1}
+.mapstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:6px}
+.mapstats div{background:var(--panel2);border-radius:6px;padding:6px 8px;font-size:12px;color:var(--mute)}
+.mapstats b{display:block;font-size:20px;color:var(--fg);font-variant-numeric:tabular-nums}
+.mapgrid{display:grid;grid-template-columns:18px repeat(8,minmax(0,1fr));gap:5px;align-items:center}
+.mapgrid .hd{font-size:15px;text-align:center;color:var(--mute);line-height:1}
+.mc{position:relative;aspect-ratio:1;border-radius:5px;background:var(--panel2);border:1.5px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:2px;min-width:0}
+.mc .hex{color:#5b6070}
+.mc .no{font-size:10px;color:#5b6070;line-height:1;font-variant-numeric:tabular-nums}
+.mc.has{background:var(--paper);color:var(--paper-ink)}
+.mc.has .hex{color:var(--paper-ink)}.mc.has .no{color:var(--paper-mute)}
+.mc .ct{position:absolute;top:-6px;right:-6px;min-width:16px;height:16px;border-radius:8px;background:var(--cin);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 3px;z-index:2}
+.mc.lr::after{content:"";position:absolute;right:-6.5px;top:50%;width:6px;height:3px;margin-top:-1.5px;background:var(--jade);z-index:1}
+.mc.ld::before{content:"";position:absolute;bottom:-6.5px;left:50%;height:6px;width:3px;margin-left:-1.5px;background:var(--jade);z-index:1}
+.mc.nb{border-color:var(--jade);box-shadow:0 0 0 1px var(--jade)}
+.mc.rv{border-color:var(--cin);box-shadow:0 0 0 1px var(--cin)}
+.mc.mr{border-color:var(--azure);box-shadow:0 0 0 1px var(--azure)}
+.mc.sel{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold);transform:scale(1.08);z-index:3}
+.mc.cand{outline:2px dashed var(--gold);outline-offset:1px}
+.mc.stance .no{color:var(--cin);font-weight:700}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--mute)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;border:2px solid var(--c);margin-right:4px;vertical-align:-1px}
+.mapdetail{background:var(--panel2);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.mapdetail .nbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px}
+.nbtn{display:flex;gap:6px;align-items:center;text-align:left;padding:4px 6px;border-radius:5px;border:1px solid var(--rule);font-size:13px}
+.nbtn.off{opacity:.5}
+.nbtn .k{color:var(--tc);font-weight:600;white-space:nowrap}
+.nbtn .c{margin-left:auto;font-weight:700;color:var(--gold)}
 .bagtop .mini{width:96px;flex:none}
 .bagtop .mini svg{width:100%;overflow:visible}
 
@@ -739,6 +768,62 @@ function links(bits,excludeUid){
 }
 const linksText=l=>`Links in deck: ${l.flow} flow · ${l.rv} reversal · ${l.mr} mirror`;
 
+/* ======================= Map of Changes (deck explorer) ======================= */
+const GRAY=[0,1,3,2,6,7,5,4]; // 3-bit Gray order: neighbours in the grid differ by one line
+const TRIG={7:['☰','Heaven'],0:['☷','Earth'],1:['☳','Thunder'],2:['☵','Water'],4:['☶','Mountain'],6:['☴','Wind'],5:['☲','Fire'],3:['☱','Lake']};
+function deckCounts(){
+  const m=new Map(),w=WEAPONS[G.bag.weapon];
+  const add=(hex,name,k=1)=>{const b=BITS[hex];if(!m.has(b))m.set(b,{n:0,cards:[]});const e=m.get(b);e.n+=k;e.cards.push(k>1?name+' ×'+k:name)};
+  G.deck.forEach(d=>add(d.hex,CARDS[d.id].name));
+  if(w)add(CARDS[w.sig].hex,CARDS[w.sig].name+' (weapon)',2);
+  return m;
+}
+function mapStats(m){
+  let cards=0,flow=0,rv=0,mr=0,iso=0;
+  for(const[b,e]of m){cards+=e.n;let has=false;
+    for(let i=0;i<6;i++){const o=m.get(b^(1<<i));if(o){has=true;if(b<(b^(1<<i)))flow+=e.n*o.n}}
+    if(!has)iso+=e.n;
+    const r=m.get(b^63);if(r&&b<(b^63))rv+=e.n*r.n;
+    const q=rev(b);if(q!==b&&q!==(b^63)&&b<q&&m.get(q))mr+=e.n*m.get(q).n;}
+  return{cards,distinct:m.size,flow,rv,mr,iso};
+}
+function renderMap(){
+  const m=deckCounts(),st=mapStats(m),sel=UI.mapSel;
+  const cand=G.screen==='reward'?new Set(G.reward.map(id=>BITS[CARDS[id].hex])):new Set();
+  const stance=G.screen==='combat'?G.c.stance:null;
+  let grid=`<span></span>`+GRAY.map(l=>`<span class="hd zh" title="Lower: ${TRIG[l][1]}">${TRIG[l][0]}</span>`).join('');
+  GRAY.forEach((u,r)=>{
+    grid+=`<span class="hd" title="Upper: ${TRIG[u][1]}">${TRIG[u][0]}</span>`;
+    GRAY.forEach((l,c)=>{
+      const b=l|(u<<3),e=m.get(b),k=[e?'has':''];
+      if(e&&c<7&&m.has(GRAY[c+1]|(u<<3)))k.push('lr');
+      if(e&&r<7&&m.has(l|(GRAY[r+1]<<3)))k.push('ld');
+      if(sel!=null){if(b===sel)k.push('sel');else if(pop(b^sel)===1)k.push('nb');else if(b===(sel^63))k.push('rv');else if(b===rev(sel))k.push('mr')}
+      if(cand.has(b))k.push('cand');if(b===stance)k.push('stance');
+      grid+=`<button class="mc ${k.join(' ')}" data-act="msel" data-i="${b}" aria-label="${NUM[b]} ${he(NUM[b])}${e?', '+e.n+' in deck':''}">${hexHTML(b,'xs')}<span class="no">${NUM[b]}</span>${e?`<span class="ct">${e.n}</span>`:''}</button>`;
+    });
+  });
+  let det='<div class="mapdetail mute">Tap a hexagram to see its six Flow neighbours, its Reversal and its Mirror.</div>';
+  if(sel!=null){
+    const e=m.get(sel),n=NUM[sel];
+    const nb=(b,label,cls)=>{const o=m.get(b);return `<button class="nbtn ${cls} ${o?'':'off'}" data-act="msel" data-i="${b}">${hexHTML(b,'xs')}<span class="k">${label}</span><span><span class="zh">${hz(NUM[b])}</span> ${he(NUM[b])}</span><span class="c">${o?o.n:''}</span></button>`};
+    const flows=[0,1,2,3,4,5].map(i=>{const b=sel^(1<<i),fx=lineFx(i,(b>>i&1)?'hard':'soft');return nb(b,`L${i+1} ${fx.name}`,'t-flow')}).join('');
+    const q=rev(sel);
+    det=`<div class="mapdetail"><div><b style="font-size:17px">${hexName(n)}</b> <span class="mute">· ${TRIG[sel>>3][1]} over ${TRIG[sel&7][1]}</span></div>
+      <div>${e?'In deck: '+e.cards.join(', '):'<span class="mute">None of your techniques sit here.</span>'}${cand.has(sel)?' <span class="chip gold">Offered now</span>':''}</div>
+      <div class="stat-label">Flow into (one line changes; the label is the line effect you get)</div><div class="nbs">${flows}</div>
+      <div class="nbs">${nb(sel^63,'Reversal','t-rev')}${q!==sel&&q!==(sel^63)?nb(q,'Mirror','t-mirror'):''}</div></div>`;
+  }
+  return `<div class="mapstats">
+      <div><b>${st.cards}</b>techniques</div><div><b>${st.distinct}</b>hexagrams used</div>
+      <div><b>${st.flow}</b>flow pairs</div><div><b>${st.rv}</b>reversal pairs</div><div><b>${st.mr}</b>mirror pairs</div>
+      <div><b style="color:${st.iso?'var(--cin)':'var(--jade)'}">${st.iso}</b>isolated (no flow partner)</div></div>
+    <p class="mute" style="font-size:13px">Rows are the upper trigram, columns the lower. Cells side by side or above and below differ by one line, so each is a Flow (the grid wraps around at the edges). Green bridges join hexagrams you own that Flow into each other.${cand.size?' Dashed gold marks the techniques you are being offered.':''}${stance!=null?' Your current stance has a red number.':''}</p>
+    <div class="mapgrid">${grid}</div>
+    <div class="legend"><span><i style="--c:var(--gold)"></i>selected</span><span><i style="--c:var(--jade)"></i>flow</span><span><i style="--c:var(--cin)"></i>reversal</span><span><i style="--c:var(--azure)"></i>mirror</span></div>
+    ${det}`;
+}
+
 /* ======================= Rendering ======================= */
 function hexHTML(bits,cls='',o={}){
   let s=`<div class="hex ${cls}" ${o.style?`style="${o.style}"`:''} aria-label="Hexagram ${NUM[bits]} ${he(NUM[bits])}">`;
@@ -917,7 +1002,7 @@ function renderReward(){
     <h3>Spoils</h3>
     <div class="choice">${G.spoils.map(s=>`<div class="itemrow">${itemOrb(s.glyph,s.col)}<div class="d"><b>${s.text}</b></div></div>`).join('')}</div>
     <h3>Learn a technique</h3>
-    <p class="mute">Links show how many of your cards it can Flow, Reverse or Mirror into.</p>
+    <p class="mute">Links show how many of your cards it can Flow, Reverse or Mirror into. <button class="btn small" data-act="mapcmp">Compare on the map</button></p>
     <div class="bigcards">${G.reward.map((id,i)=>bigCard({id,hex:CARDS[id].hex},{btn:true,act:'pick',i,links:links(BITS[CARDS[id].hex])})).join('')}</div>
     <div><button class="btn" data-act="pick" data-i="-1">Take nothing</button></div>
   </div>`;
@@ -1008,8 +1093,9 @@ function renderModal(){
       <div class="seq">${f.seq.map((n,i)=>`${i?'<span class="mute">→</span>':''}<div class="step">${hexHTML(BITS[n],'')}<span class="zh">${hz(n)}</span><span>${he(n)}</span></div>`).join('')}
       <span class="mute">⇒</span><div class="step" style="width:84px">${art(f.card,CARDS[f.card].hex,'art')}<span>${CARDS[f.card].name}</span></div></div>
       <span class="mute" style="font-size:14px">${f.lore} ${CARDS[f.card].text}</span></div>`).join('')}`;
-  else if(UI.modal==='deck'){const w=WEAPONS[G.bag.weapon];
-    body=`<h3>Your techniques (${G.deck.length}${w?' + 2 weapon':''})</h3><div class="bigcards">${G.deck.map(d=>bigCard(d,{links:links(BITS[d.hex],d.uid)})).join('')}${w?bigCard({id:w.sig,hex:CARDS[w.sig].hex,sig:true}):''}</div>`}
+  else if(UI.modal==='deck'){const w=WEAPONS[G.bag.weapon],tab=UI.deckTab||'cards';
+    body=`<h3>Your techniques (${G.deck.length}${w?' + 2 weapon':''})</h3>
+    <div class="tabs"><button class="btn small ${tab==='cards'?'on':''}" data-act="dtab" data-i="cards">Cards</button><button class="btn small ${tab==='map'?'on':''}" data-act="dtab" data-i="map">Map of Changes</button></div>`+(tab==='map'?renderMap():`<div class="bigcards">${G.deck.map(d=>bigCard(d,{links:links(BITS[d.hex],d.uid)})).join('')}${w?bigCard({id:w.sig,hex:CARDS[w.sig].hex,sig:true}):''}</div>`)}
   else if(UI.modal==='bag')body=renderBag();
   $modal.innerHTML=`<div class="modal" data-act="close"><div class="sheet" data-stop="1">${body}<div><button class="btn" data-act="close">Close</button></div></div></div>`;
   $modal.querySelectorAll('.step svg.art').forEach(s=>s.style.width='84px');
@@ -1024,6 +1110,9 @@ document.addEventListener('click',e=>{
   if(act.startsWith('m:')){UI.modal=act.slice(2);return renderModal()}
   switch(act){
     case 'close':UI.modal=null;return renderModal();
+    case 'dtab':UI.deckTab=i;return renderModal();
+    case 'msel':{const b=+i;UI.mapSel=UI.mapSel===b?null:b;const y=$modal.querySelector('.modal').scrollTop;renderModal();const mm=$modal.querySelector('.modal');if(mm)mm.scrollTop=y;return}
+    case 'mapcmp':UI.modal='deck';UI.deckTab='map';UI.mapSel=BITS[CARDS[G.reward[0]].hex];return renderModal();
     case 'arms':UI.modal=null;G=null;UI.arm='jian';return renderArmsScreen();
     case 'arm':UI.arm=i;return renderArmsScreen();
     case 'go':return newGame(UI.arm);
