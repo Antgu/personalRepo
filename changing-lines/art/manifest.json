@@ -1,1 +1,6 @@
-{}
+{
+  "card:breakthrough": "art/cards/breakthrough.webp",
+  "card:gate": "art/cards/gate.webp",
+  "card:still": "art/cards/still.webp",
+  "card:guard": "art/cards/guard.webp"
+}
