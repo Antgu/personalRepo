@@ -144,6 +144,10 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--gold);outl
 .tr span{font-weight:400;color:var(--fg)}
 .pv-row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:auto}
 .extra{font-size:13px;color:var(--jade)}
+.flowtxt{font-size:13px;color:var(--paper-mute);border-left:2px solid var(--jade);padding-left:6px;margin:0}
+.flowtxt b{color:var(--jade);font-size:inherit}
+.flowtxt.on{color:var(--fg);background:color-mix(in srgb,var(--jade) 12%,transparent);border-radius:0 4px 4px 0;padding:2px 6px}
+.flowtxt span{color:var(--jade);font-weight:600}
 .t-flow{--tc:var(--jade)}.t-step{--tc:var(--stone)}.t-break{--tc:var(--plum)}.t-still{--tc:var(--gold)}.t-mirror{--tc:var(--azure)}.t-rev{--tc:var(--cin)}
 
 /* hand */
@@ -521,7 +525,7 @@ function revMult(card){const k=card&&CARDS[card.id].revBonus?2:1;return 1+G.c.mo
 function trInfo(tr,card){
   const mom=G.c?G.c.momentum:0;
   switch(tr.type){
-    case 'flow':{const fx=lineFx(tr.line,tr.dir);return{cls:'t-flow',short:'FLOW',label:`Flow · line ${tr.line+1} ${tr.dir==='hard'?'turns yang':'turns yin'}`,desc:` −1 Qi, +1 Momentum, ${fx.name}: ${fx.desc}`}}
+    case 'flow':{const fx=lineFx(tr.line,tr.dir);return{cls:'t-flow',short:'FLOW',label:`Flow · line ${tr.line+1} ${tr.dir==='hard'?'turns yang':'turns yin'}`,desc:` +1 Momentum, ${fx.name}: ${fx.desc}`+(card&&CARDS[card.id].flow?`, plus Flow bonus`:'')}}
     case 'step':return{cls:'t-step',short:'STEP',label:'Step · 2 lines change',desc:' normal play, Momentum kept'};
     case 'break':return{cls:'t-break',short:'BREAK',label:`Broken rhythm · ${tr.n} lines change`,desc:' +1 Qi cost, Momentum lost'};
     case 'still':return{cls:'t-still',short:'STILL',label:'Stillness · same hexagram',desc:' ×1.5 potency, Momentum kept'};
@@ -532,46 +536,46 @@ function trInfo(tr,card){
 
 /* ======================= Cards ======================= */
 const CARDS={
-  guard:{name:'Receptive Guard',hex:2,cost:1,text:'Gain 6 Block.',play:x=>B(x,6)},
-  returnFist:{name:'Returning Fist',hex:24,cost:1,text:'Deal 6.',play:x=>A(x,6)},
-  approach:{name:'Approaching Step',hex:19,cost:1,text:'Deal 4. Gain 3 Block.',play:x=>{A(x,4);B(x,3)}},
-  peace:{name:'Peaceful Palm',hex:11,cost:1,text:'Deal 8.',play:x=>A(x,8)},
-  thunder:{name:'Thunder Step',hex:51,cost:1,text:'Deal 3 twice.',play:x=>A(x,3,2)},
-  willow:{name:'Willow Sway',hex:57,cost:1,text:'Gain 5 Block. Draw 1.',play:x=>{B(x,5);draw(1)}},
-  still:{name:'Stone Stance',hex:52,cost:1,text:'Gain 7 Block.',play:x=>B(x,7)},
-  gate:{name:'Closed Gate',hex:12,cost:1,text:'Gain 4 Block. Deal 3.',play:x=>{B(x,4);A(x,3)}},
-  dragon:{name:'Hidden Dragon Palm',hex:1,cost:2,text:'Deal 13. If you had 3+ Momentum, lose 3 HP (the arrogant dragon repents).',play:x=>{A(x,13);if(x.momBefore>=3)selfHurt(3,'Arrogant dragon')}},
-  breakthrough:{name:'Breakthrough Fist',hex:43,cost:2,text:'Deal 10, ignoring Block.',play:x=>A(x,10,1,true)},
-  meet:{name:'Coming to Meet',hex:44,cost:1,text:'Deal 5. Gain 4 Block.',play:x=>{A(x,5);B(x,4)}},
-  power:{name:'Great Power',hex:34,cost:1,text:'Gain 2 Strength for this duel. Exhaust.',exhaust:true,play:x=>{G.c.str+=2;fl('me','+2 Strength','gold')}},
-  abyss:{name:'River Turning',hex:29,cost:2,text:'Gain 4 Block. Counter the next attack.',play:x=>{B(x,4);G.c.counter=true}},
-  clinging:{name:'Clinging Flame',hex:30,cost:1,text:'Apply 4 Burn.',play:x=>{const v=Math.floor(4*x.mult);G.c.foe.burn+=v;fl('foe','+'+v+' Burn','gold')}},
-  biting:{name:'Biting Through',hex:21,cost:1,text:'Deal 7.',play:x=>A(x,7)},
-  upward:{name:'Pushing Upward',hex:46,cost:1,text:'Deal 4. Gain 1 Momentum.',play:x=>{A(x,4);G.c.momentum++}},
-  modesty:{name:'Modest Bow',hex:15,cost:0,text:'Gain 4 Block.',play:x=>B(x,4)},
-  increase:{name:'Increase',hex:42,cost:1,text:'Draw 2.',play:x=>draw(2)},
-  decrease:{name:'Decrease',hex:41,cost:0,text:'Lose 2 HP. Gain 1 Qi.',play:x=>{selfHurt(2);G.c.qi++}},
-  before:{name:'Before Completion',hex:64,cost:2,text:'Deal 8. Reversals into this card count Momentum twice.',revBonus:true,play:x=>A(x,8)},
-  after:{name:'After Completion',hex:63,cost:2,text:'Gain 14 Block.',play:x=>B(x,14)},
-  treading:{name:"Tiger's Tail Step",hex:10,cost:1,text:'Deal 6. Sidestep the next hit.',play:x=>{A(x,6);G.c.sidestep=true}},
-  drum:{name:'Rousing Drum',hex:16,cost:1,text:'Deal 4. If played by Flow, gain 1 Qi.',play:x=>{A(x,4);if(x.tr.type==='flow')G.c.qi++}},
-  duration:{name:'Enduring Pine',hex:32,cost:1,text:'Deal 4. Gain 4 Block.',play:x=>{A(x,4);B(x,4)}},
-  split:{name:'Splitting Apart',hex:23,cost:1,text:'Remove all enemy Block. Deal 5.',play:x=>{G.c.foe.block=0;A(x,5)}},
-  army:{name:'Ranks of the Army',hex:7,cost:1,text:'Deal 5. Gain 4 Block.',play:x=>{A(x,5);B(x,4)}},
-  feint:{name:'Joyous Lake Feint',hex:58,cost:1,text:'Deal 4. Draw 1.',play:x=>{A(x,4);draw(1)}},
-  taming:{name:'Small Taming',hex:9,cost:1,text:'Gain 5 Block. Enemy loses 2 Strength.',play:x=>{B(x,5);G.c.foe.str-=2;fl('foe','−2 Strength','good')}},
-  sprout:{name:'Sprouting Blade',hex:3,cost:0,text:'Deal 3. Draw 1.',play:x=>{A(x,3);draw(1)}},
+  guard:{name:'Receptive Guard',hex:2,cost:1,text:'Gain 6 Block.',flow:'Draw 1.',fb:x=>{draw(1)},play:x=>B(x,6)},
+  returnFist:{name:'Returning Fist',hex:24,cost:1,text:'Deal 6.',flow:'Return the top card of your discard pile to your hand.',fb:x=>{retDiscard()},play:x=>A(x,6)},
+  approach:{name:'Approaching Step',hex:19,cost:1,text:'Deal 4. Gain 3 Block.',flow:'Your next attack deals double.',fb:x=>{emp()},play:x=>{A(x,4);B(x,3)}},
+  peace:{name:'Peaceful Palm',hex:11,cost:1,text:'Deal 8.',flow:'Recover 3 health.',fb:x=>{heal(3)},play:x=>A(x,8)},
+  thunder:{name:'Thunder Step',hex:51,cost:1,text:'Deal 3 twice.',flow:'Strike a third time for 3.',fb:x=>{A(x,3)},play:x=>A(x,3,2)},
+  willow:{name:'Willow Sway',hex:57,cost:1,text:'Gain 5 Block. Draw 1.',flow:'Sidestep the next hit.',fb:x=>{G.c.sidestep=true},play:x=>{B(x,5);draw(1)}},
+  still:{name:'Stone Stance',hex:52,cost:1,text:'Gain 7 Block.',flow:'Keep your Block into next turn.',fb:x=>{retain()},play:x=>B(x,7)},
+  gate:{name:'Closed Gate',hex:12,cost:1,text:'Gain 4 Block. Deal 3.',flow:'Enemy loses 1 Strength.',fb:x=>{weaken(1)},play:x=>{B(x,4);A(x,3)}},
+  dragon:{name:'Hidden Dragon Palm',hex:1,cost:2,text:'Deal 13. If you had 3+ Momentum, lose 3 HP (the arrogant dragon repents).',flow:'Gain 1 Momentum.',fb:x=>{G.c.momentum++},play:x=>{A(x,13);if(x.momBefore>=3)selfHurt(3,'Arrogant dragon')}},
+  breakthrough:{name:'Breakthrough Fist',hex:43,cost:2,text:'Deal 10, ignoring Block.',flow:'Strike again for 5, ignoring Block.',fb:x=>{A(x,5,1,true)},play:x=>A(x,10,1,true)},
+  meet:{name:'Coming to Meet',hex:44,cost:1,text:'Deal 5. Gain 4 Block.',flow:'Counter the next attack.',fb:x=>{G.c.counter=true},play:x=>{A(x,5);B(x,4)}},
+  power:{name:'Great Power',hex:34,cost:1,text:'Gain 2 Strength for this duel. Exhaust.',exhaust:true,flow:'Gain 1 more Strength.',fb:x=>{G.c.str++},play:x=>{G.c.str+=2;fl('me','+2 Strength','gold')}},
+  abyss:{name:'River Turning',hex:29,cost:2,text:'Gain 4 Block. Counter the next attack.',flow:'Gain 6 more Block.',fb:x=>{B(x,6)},play:x=>{B(x,4);G.c.counter=true}},
+  clinging:{name:'Clinging Flame',hex:30,cost:1,text:'Apply 4 Burn.',flow:'Apply 3 more Burn.',fb:x=>{burnFoe(3)},play:x=>{const v=Math.floor(4*x.mult);G.c.foe.burn+=v;fl('foe','+'+v+' Burn','gold')}},
+  biting:{name:'Biting Through',hex:21,cost:1,text:'Deal 7.',flow:'Your next attack deals double.',fb:x=>{emp()},play:x=>A(x,7)},
+  upward:{name:'Pushing Upward',hex:46,cost:1,text:'Deal 4. Gain 1 Momentum.',flow:'Draw 1.',fb:x=>{draw(1)},play:x=>{A(x,4);G.c.momentum++}},
+  modesty:{name:'Modest Bow',hex:15,cost:0,text:'Gain 4 Block.',flow:'Gain 1 Qi.',fb:x=>{gainQi(1)},fbQi:1,play:x=>B(x,4)},
+  increase:{name:'Increase',hex:42,cost:1,text:'Draw 2.',flow:'Draw 1 more.',fb:x=>{draw(1)},play:x=>draw(2)},
+  decrease:{name:'Decrease',hex:41,cost:0,text:'Lose 2 HP. Gain 1 Qi.',flow:'Lose no health.',fb:x=>{0},play:x=>{if(x.tr.type!=='flow')selfHurt(2);G.c.qi++}},
+  before:{name:'Before Completion',hex:64,cost:2,text:'Deal 8. Reversals into this card count Momentum twice.',revBonus:true,flow:'Your next card costs 1 less.',fb:x=>{G.c.discount=1},play:x=>A(x,8)},
+  after:{name:'After Completion',hex:63,cost:2,text:'Gain 14 Block.',flow:'Recover 4 health.',fb:x=>{heal(4)},play:x=>B(x,14)},
+  treading:{name:"Tiger's Tail Step",hex:10,cost:1,text:'Deal 6. Sidestep the next hit.',flow:'Your next attack gets +3.',fb:x=>{G.c.advance+=3},play:x=>{A(x,6);G.c.sidestep=true}},
+  drum:{name:'Rousing Drum',hex:16,cost:1,text:'Deal 4.',flow:'Gain 1 Qi.',fb:x=>{gainQi(1)},fbQi:1,play:x=>A(x,4)},
+  duration:{name:'Enduring Pine',hex:32,cost:1,text:'Deal 4. Gain 4 Block.',flow:'Keep your Block into next turn.',fb:x=>{retain()},play:x=>{A(x,4);B(x,4)}},
+  split:{name:'Splitting Apart',hex:23,cost:1,text:'Remove all enemy Block. Deal 5.',flow:'Strike again for 5.',fb:x=>{A(x,5)},play:x=>{G.c.foe.block=0;A(x,5)}},
+  army:{name:'Ranks of the Army',hex:7,cost:1,text:'Deal 5. Gain 4 Block.',flow:'Gain 1 Strength this turn.',fb:x=>{G.c.tempStr++},play:x=>{A(x,5);B(x,4)}},
+  feint:{name:'Joyous Lake Feint',hex:58,cost:1,text:'Deal 4. Draw 1.',flow:'Interrupt the enemy, whatever their stance.',fb:x=>{interruptFoe()},play:x=>{A(x,4);draw(1)}},
+  taming:{name:'Small Taming',hex:9,cost:1,text:'Gain 5 Block. Enemy loses 2 Strength.',flow:'Draw 1.',fb:x=>{draw(1)},play:x=>{B(x,5);G.c.foe.str-=2;fl('foe','−2 Strength','good')}},
+  sprout:{name:'Sprouting Blade',hex:3,cost:0,text:'Deal 3. Draw 1.',flow:'Draw 1 more.',fb:x=>{draw(1)},play:x=>{A(x,3);draw(1)}},
   // forms
-  f_spring:{name:'Spring Thunder Strike',hex:25,cost:1,form:true,exhaust:true,text:'Deal 14. Exhaust.',play:x=>A(x,14)},
-  f_ascend:{name:'Great Power Surge',hex:34,cost:1,form:true,exhaust:true,text:'Deal 10. Gain 2 Strength for this duel. Exhaust.',play:x=>{A(x,10);G.c.str+=2}},
-  f_mountain:{name:'Immovable Mountain',hex:23,cost:1,form:true,exhaust:true,text:'Gain 12 Block. Counter the next attack. Exhaust.',play:x=>{B(x,12);G.c.counter=true}},
+  f_spring:{name:'Spring Thunder Strike',hex:25,cost:1,form:true,exhaust:true,text:'Deal 14. Exhaust.',flow:'Your next attack deals double.',fb:x=>{emp()},play:x=>A(x,14)},
+  f_ascend:{name:'Great Power Surge',hex:34,cost:1,form:true,exhaust:true,text:'Deal 10. Gain 2 Strength for this duel. Exhaust.',flow:'Gain 1 Qi.',fb:x=>{gainQi(1)},fbQi:1,play:x=>{A(x,10);G.c.str+=2}},
+  f_mountain:{name:'Immovable Mountain',hex:23,cost:1,form:true,exhaust:true,text:'Gain 12 Block. Counter the next attack. Exhaust.',flow:'Recover 5 health.',fb:x=>{heal(5)},play:x=>{B(x,12);G.c.counter=true}},
   // weapon techniques
-  s_jian:{name:'Cloud-Piercing Thrust',hex:26,cost:1,text:'Deal 9.',play:x=>A(x,9)},
-  s_dao:{name:'Whirlwind Cut',hex:54,cost:1,text:'Deal 5 twice.',play:x=>A(x,5,2)},
-  s_spear:{name:'Dragon Leaves the Sea',hex:5,cost:1,text:'Deal 7. Your next attack gets +3.',play:x=>{A(x,7);G.c.advance+=3}},
-  s_fan:{name:'Folding Moon',hex:20,cost:1,text:'Gain 6 Block. If played by Mirror or Reversal, gain 6 more.',play:x=>{B(x,6);if(x.tr.type==='mirror'||x.tr.type==='reversal')B(x,6)}},
-  s_staff:{name:'Sweeping Staff',hex:8,cost:1,text:'Deal 4. Gain 4 Block.',play:x=>{A(x,4);B(x,4)}},
-  s_hooks:{name:'Twin Hook Snare',hex:40,cost:1,text:'Deal 3 twice. Enemy loses 1 Strength.',play:x=>{A(x,3,2);G.c.foe.str-=1}},
+  s_jian:{name:'Cloud-Piercing Thrust',hex:26,cost:1,text:'Deal 9.',flow:'Strike again for 4, ignoring Block.',fb:x=>{A(x,4,1,true)},play:x=>A(x,9)},
+  s_dao:{name:'Whirlwind Cut',hex:54,cost:1,text:'Deal 5 twice.',flow:'Gain 1 Momentum.',fb:x=>{G.c.momentum++},play:x=>A(x,5,2)},
+  s_spear:{name:'Dragon Leaves the Sea',hex:5,cost:1,text:'Deal 7. Your next attack gets +3.',flow:'Sidestep the next hit.',fb:x=>{G.c.sidestep=true},play:x=>{A(x,7);G.c.advance+=3}},
+  s_fan:{name:'Folding Moon',hex:20,cost:1,text:'Gain 6 Block. If played by Mirror or Reversal, gain 6 more.',flow:'Draw 1.',fb:x=>{draw(1)},play:x=>{B(x,6);if(x.tr.type==='mirror'||x.tr.type==='reversal')B(x,6)}},
+  s_staff:{name:'Sweeping Staff',hex:8,cost:1,text:'Deal 4. Gain 4 Block.',flow:'Gain 4 more Block.',fb:x=>{B(x,4)},play:x=>{A(x,4);B(x,4)}},
+  s_hooks:{name:'Twin Hook Snare',hex:40,cost:1,text:'Deal 3 twice. Enemy loses 1 Strength.',flow:'Gain 1 Qi.',fb:x=>{gainQi(1)},fbQi:1,play:x=>{A(x,3,2);G.c.foe.str-=1}},
 };
 const STARTER=['guard','guard','returnFist','returnFist','approach','peace','thunder','willow','still','gate'];
 const POOL=['dragon','breakthrough','meet','power','abyss','clinging','biting','upward','modesty','increase','decrease','before','after','treading','drum','duration','split','army','feint','taming','sprout'];
@@ -635,7 +639,7 @@ function combatDeck(){
 }
 function startCombat(){
   const f=FOES[G.fight];
-  G.c={draw:shuffle(combatDeck()),hand:[],discard:[],exhaust:[],qi:3,stance:BITS[2],momentum:0,balance:0,block:0,str:0,tempStr:0,advance:0,sidestep:false,counter:false,burn:0,shiftUsed:false,hookUsed:false,history:[2],formsTurn:new Set(),formsDone:new Set(),log:'You take the Receptive stance and bow. The duel begins.',lastMask:0,busy:false,turn:0,anim:[],
+  G.c={draw:shuffle(combatDeck()),hand:[],discard:[],exhaust:[],qi:3,stance:BITS[2],momentum:0,balance:0,block:0,str:0,tempStr:0,advance:0,empower:false,retain:false,discount:0,sidestep:false,counter:false,burn:0,shiftUsed:false,hookUsed:false,history:[2],formsTurn:new Set(),formsDone:new Set(),log:'You take the Receptive stance and bow. The duel begins.',lastMask:0,busy:false,turn:0,anim:[],
     foe:{...f,hp:f.hp,max:f.hp,block:0,str:0,burn:G.bag.charm==='lantern'?4:0,mi:0,interrupted:false}};
   G.screen='combat';UI.sel=null;UI.item=null;UI.shift=false;UI.modal=null;
   startTurn();
@@ -650,7 +654,7 @@ function draw(n){
   }
 }
 function startTurn(){
-  const c=G.c;c.turn++;c.block=0;c.tempStr=0;c.counter=false;c.sidestep=false;c.hookUsed=false;c.formsTurn=new Set();
+  const c=G.c;c.turn++;if(c.retain){c.retain=false}else c.block=0;c.discount=0;c.tempStr=0;c.counter=false;c.sidestep=false;c.hookUsed=false;c.formsTurn=new Set();
   const notes=[];
   if(c.burn>0){selfHurt(c.burn,'Burn');c.burn--}
   if(Math.abs(c.balance)>=9){selfHurt(3);c.tempStr+=2;notes.push('Qi Deviation: −3 HP, +2 Strength this turn');fl('me','Qi Deviation','dmg')}
@@ -666,14 +670,23 @@ function startTurn(){
 /* ======================= Effects ======================= */
 function A(x,base,hits=1,pierce=false){
   const c=G.c;c.anim.push('heroLunge');
+  if(x.emp===undefined){x.emp=c.empower;c.empower=false;if(x.emp)fl('me','×2','gold big')}
   for(let i=0;i<hits;i++){
     let d=base+c.str+c.tempStr+c.momentum;
     if(c.advance){d+=c.advance;c.advance=0}
-    d=Math.max(0,Math.floor(d*x.mult));
+    d=Math.max(0,Math.floor(d*x.mult*(x.emp?2:1)));
     hitFoe(d,pierce);
     if(c.foe.hp<=0)break;
   }
 }
+function emp(){G.c.empower=true;fl('me','Next attack ×2','gold')}
+function retain(){G.c.retain=true;fl('me','Block kept','blk')}
+function heal(n){G.hp=Math.min(maxHp(),G.hp+n);fl('me','+'+n+' HP','good')}
+function weaken(n){G.c.foe.str-=n;fl('foe','−'+n+' Strength','good')}
+function burnFoe(n){G.c.foe.burn+=n;fl('foe','+'+n+' Burn','gold')}
+function gainQi(n){G.c.qi+=n;fl('me','+'+n+' Qi','gold')}
+function interruptFoe(){if(!G.c.foe.interrupted){G.c.foe.interrupted=true;fl('foe','Interrupted','good')}}
+function retDiscard(){const c=G.c;if(c.discard.length&&c.hand.length<10){const k=c.discard.pop();c.hand.push(k);fl('me','Returned '+CARDS[k.id].name,'good')}}
 function B(x,n){const v=Math.floor(n*x.mult);G.c.block+=v;fl('me','+'+v+' Block','blk')}
 function hitFoe(d,pierce,tag){
   const f=G.c.foe;
@@ -690,13 +703,13 @@ function hurtMe(d){
 }
 
 /* ======================= Player actions ======================= */
-function effCost(inst,tr){const b=costOf(inst);if(tr.type==='flow')return Math.max(0,b-1);if(tr.type==='break')return b+1;return b}
+function effCost(inst,tr,disc){const b=costOf(inst)+(tr.type==='break'?1:0);return Math.max(0,b-(disc==null?(G.c?G.c.discount||0:0):disc))}
 function play(idx){
   const c=G.c;if(c.busy)return;
   const inst=c.hand[idx],def=CARDS[inst.id],bits=BITS[inst.hex];
   const tr=classify(c.stance,bits),cost=effCost(inst,tr);
   if(c.qi<cost)return;
-  c.qi-=cost;c.hand.splice(idx,1);UI.sel=null;
+  c.qi-=cost;c.discount=0;c.hand.splice(idx,1);UI.sel=null;
   const x={mult:1,tr,inst,momBefore:c.momentum};
   const msgs=[`${def.name}: ${trInfo(tr,inst).short.toLowerCase()}`];
   const wp=G.bag.weapon;
@@ -716,6 +729,7 @@ function play(idx){
   const fb=BITS[curMove().hex];
   if(bits===(fb^63)&&!c.foe.interrupted){c.foe.interrupted=true;msgs.push('Interrupt!');fl('foe','Interrupted','good')}
   def.play(x);
+  if(tr.type==='flow'&&def.fb){def.fb(x);msgs.push('Flow bonus: '+def.flow)}
   c.balance=Math.max(-12,Math.min(12,c.balance+pop(bits)-3));
   c.lastMask=c.stance^bits;c.stance=bits;c.history.push(inst.hex);
   checkForms(msgs);
@@ -932,7 +946,7 @@ function renderTitle(){
   <p>You walk the rivers and lakes of the jianghu, testing your hands against three schools and then the Master of Changes. Every technique you know is a hexagram. How you move between them decides how hard you hit.</p>
   <ul class="rules">
     <li><b>Your stance</b> is the hexagram of the last technique you played.</li>
-    <li><b style="color:var(--jade)">Flow</b>: change one line. The move costs 1 less Qi, builds Momentum and triggers that line's effect.</li>
+    <li><b style="color:var(--jade)">Flow</b>: change one line. The move builds Momentum, triggers that line's effect, and fires the card's own Flow bonus.</li>
     <li><b style="color:var(--cin)">Reversal</b>: flip all six lines to spend your Momentum as a multiplier.</li>
     <li><b style="color:var(--azure)">Mirror</b>: play your stance turned upside down to counter the next blow.</li>
     <li>Strike from the <b>opposite</b> of your foe's stance to interrupt them. Chain the sequences in Forms for free techniques.</li>
@@ -959,6 +973,9 @@ function statusChips(){
   if(c.str+c.tempStr)a.push(`<span class="chip str">Str ${c.str+c.tempStr}</span>`);
   if(c.advance)a.push(`<span class="chip good">Advance +${c.advance}</span>`);
   if(c.sidestep)a.push(`<span class="chip good">Sidestep</span>`);
+  if(c.empower)a.push(`<span class="chip gold">Next attack ×2</span>`);
+  if(c.retain)a.push(`<span class="chip blk">Block kept</span>`);
+  if(c.discount)a.push(`<span class="chip good">Next card −${c.discount} Qi</span>`);
   if(c.counter)a.push(`<span class="chip gold">Counter</span>`);
   if(c.burn)a.push(`<span class="chip burn">Burn ${c.burn}</span>`);
   return a.join('');
@@ -970,9 +987,10 @@ function renderCombat(){
   let nx=null;
   if(sel){const b=BITS[sel.hex];tr=classify(c.stance,b);chg=c.stance^b;info=trInfo(tr,sel);
     let q=c.qi-effCost(sel,tr);
-    if(tr.type==='flow'){if(lineFx(tr.line,tr.dir).name==='Surge')q++;if(G.bag.weapon==='hooks'&&!c.hookUsed)q++}
+    const sd=CARDS[sel.id];
+    if(tr.type==='flow'){if(lineFx(tr.line,tr.dir).name==='Surge')q++;if(G.bag.weapon==='hooks'&&!c.hookUsed)q++;q+=sd.fbQi||0}
     if(sel.id==='decrease')q++;
-    nx={bits:b,qi:q}}
+    nx={bits:b,qi:q,disc:tr.type==='flow'&&sel.id==='before'?1:0}}
   const stanceNum=NUM[c.stance];
   const qiPips=Array.from({length:Math.max(3,c.qi)},(_,i)=>`<i class="${i<c.qi?'f':''}"></i>`).join('');
   const balPct=50+c.balance/12*50;
@@ -993,7 +1011,7 @@ function renderCombat(){
     FORMS.forEach(fm=>{if(hist.length===3&&hist.every((n,i)=>n===fm.seq[i])&&!c.formsTurn.has(fm.id))extras.push(`Completes the Form “${fm.name}”.`)});
     if(sel.id==='dragon'&&c.momentum>=3)extras.push('Momentum 3+: you will lose 3 HP.');
     pv=`<div class="pvart">${art(sel.id,sel.hex)}</div><div class="pv"><div class="pv-head"><b>${def.name}</b><span class="hx">${hexName(sel.hex)}</span></div>
-      <div class="pv-text">${def.text}</div>
+      <div class="pv-text">${def.text}</div>${def.flow?`<div class="flowtxt ${tr.type==='flow'?'on':''}"><b>Flow:</b> ${def.flow}${tr.type==='flow'?' <span>(active)</span>':''}</div>`:''}
       <div class="tr ${info.cls}">${info.label}<span>${info.desc}</span></div>
       ${extras.map(e=>`<div class="extra">${e}</div>`).join('')}
       <div class="pv-row"><span class="mute" style="font-size:13px">${cost} Qi${cost!==costOf(sel)?` (base ${costOf(sel)})`:''} · leaves ${Math.max(0,nx.qi)} Qi. Other cards show their cost after this one.</span><button class="btn primary" data-act="play" ${can?'':'disabled'}>${c.qi<cost?'Not enough Qi':'Play'}</button></div></div>`;
@@ -1039,7 +1057,7 @@ function renderCombat(){
   <section class="hand ${nx?'withnext':''}">${c.hand.map((h,i)=>{
       const t=classify(c.stance,BITS[h.hex]),ti=trInfo(t,h),ec=effCost(h,t),base=costOf(h);
       let nxt='';
-      if(nx&&i!==UI.sel){const t2=classify(nx.bits,BITS[h.hex]),ti2=trInfo(t2,h),ec2=effCost(h,t2);
+      if(nx&&i!==UI.sel){const t2=classify(nx.bits,BITS[h.hex]),ti2=trInfo(t2,h),ec2=effCost(h,t2,nx.disc);
         nxt=`<span class="next ${ti2.cls} ${ec2>nx.qi?'no':''}" title="If played after ${CARDS[sel.id].name}">then ${ec2} · ${ti2.short}</span>`}
       return `<button class="card ${ti.cls} ${UI.sel===i?'sel':''} ${c.qi<ec?'na':''} ${h.temp?'temp':''} ${h.sig?'sig':''}" data-act="sel" data-i="${i}">
         <span class="cost ${ec<base?'down':ec>base?'up':''}">${ec}</span><span class="badge">${ti.short}</span>
@@ -1056,7 +1074,7 @@ function bigCard(inst,opt={}){
   return `<${tag} class="bigcard ${opt.sel?'sel':''} ${inst.sig?'sig':''}" ${opt.act?`data-act="${opt.act}" data-i="${opt.i}"`:''}>
     ${art(id,hex)}<span class="cost">${costOf(inst)}</span>${t?`<span class="tag">${t}</span>`:''}
     <div class="body"><div class="row">${hexHTML(BITS[hex],'sm',{style:'color:var(--paper-ink)'})}<div><b>${d.name}</b><div class="hn">${hexName(hex)}</div></div></div>
-    <p>${d.text}</p>${l?`<div class="links">${linksText(l)}</div>`:''}</div></${tag}>`;
+    <p>${d.text}</p>${d.flow?`<p class="flowtxt"><b>Flow:</b> ${d.flow}</p>`:''}${l?`<div class="links">${linksText(l)}</div>`:''}</div></${tag}>`;
 }
 function renderReward(){
   const f=FOES[G.fight];
@@ -1135,7 +1153,7 @@ function renderModal(){
   if(UI.modal==='rules')body=`<h3>How the Changes fight</h3>
     <p>Your stance is the hexagram of the last technique you played. Each new technique is judged by how its hexagram differs from your stance. Lines are counted from the bottom (1) to the top (6).</p>
     <h4>Transitions</h4><div class="tbl"><table><tr><th>Transition</th><th>When</th><th>Effect</th></tr>
-    <tr><td style="color:var(--jade)">Flow</td><td>1 line changes</td><td>−1 Qi, +1 Momentum, line effect</td></tr>
+    <tr><td style="color:var(--jade)">Flow</td><td>1 line changes</td><td>+1 Momentum, line effect, and the card's Flow bonus</td></tr>
     <tr><td>Step</td><td>2 lines change</td><td>Normal</td></tr>
     <tr><td style="color:var(--plum)">Broken rhythm</td><td>3–5 lines change</td><td>+1 Qi, Momentum lost</td></tr>
     <tr><td style="color:var(--gold)">Stillness</td><td>Same hexagram</td><td>×1.5 potency</td></tr>
