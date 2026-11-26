@@ -4,5 +4,5 @@
   "card:still": "art/cards/still.webp",
   "card:guard": "art/cards/guard.webp",
   "portrait:hero": "art/fighters/hero_portrait.webp",
-  "fighter:hero:jian": "art/fighters/hero_jian.webp"
+  "fighter:hero:jian": "art/fighters/hero_jian_idle.webp"
 }
