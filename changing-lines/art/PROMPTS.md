@@ -129,3 +129,10 @@ The published game page does not read from GitHub by itself. Once the images are
 | `card:fan` | an open iron fan painted with a red sun, laid diagonally on silk with petals |
 | `card:staff` | a monk's staff with brass bands, laid diagonally on silk with petals |
 | `card:hooks` | a pair of hook swords, laid diagonally on silk with petals |
+
+## Inventory portrait
+
+The Bag shows a full-length portrait of the hero. Save it as `changing-lines/art/fighters/hero_portrait.webp` (or `.png`) and add `"portrait:hero": "art/fighters/hero_portrait.webp"` to `art/manifest.json`.
+
+- Size: 900×1320 px (ratio 300:440), full body, standing, feet near the bottom edge; the figure fills about two thirds of the height.
+- Prompt: *Chinese fantasy (guofeng) digital painting, full-length portrait of a young swordswoman, the Wanderer, long black hair loose in the wind with a thin red ribbon, calm pale face, a long open black outer robe over a white inner robe with red ties and a red sash, leather belt with a short sword, a straight sword in a dark scabbard worn on her back with the hilt over her shoulder, one hand raised to the scabbard strap; pale grey-white background with a single vertical grey band behind her, tall silver pampas grass and reeds swaying around her, small brown sparrows perched and in flight; soft muted palette with red accents, fine linework, painterly, airy, high detail, no text, no border, no watermark.*

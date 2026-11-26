@@ -244,25 +244,33 @@ th{color:var(--mute);font-weight:600;text-transform:uppercase;font-size:12px;let
 .form .step .zh{font-size:16px}
 .form.done{outline:1px solid var(--gold)}
 .bagtop{display:flex;gap:12px;align-items:center}
-.chest{background:linear-gradient(#2e2622,#221c19);border:2px solid #7a5c32;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:10px;box-shadow:inset 0 0 0 1px #000,0 6px 18px #3a332a40;color:#cdbf9f}
-.doll{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:8px;align-items:center}
-.dollfig svg{width:100%;display:block;overflow:visible}
-.dollside{display:flex;flex-direction:column;gap:8px;align-items:center;font-size:13px}
-.dollside .gold{color:#e1c27a}
-.slot{background:#1a1512;border:1px solid #5c4630;border-radius:4px;display:grid;place-items:center;color:#8f8068;font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:4px;position:relative}
+.chest{background:linear-gradient(#f2f1ed,#e7e5df);border:1px solid #c9c5bb;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:10px;box-shadow:0 6px 18px #3a332a1f;color:#4a4742}
+.doll{display:grid;grid-template-columns:1.6fr 1fr;gap:10px;align-items:stretch}
+.dollfig{border-radius:4px;overflow:hidden;border:1px solid #cfcbc2;background:#ecebe7}
+.dollfig{aspect-ratio:300/440;min-width:0;align-self:start}
+.dollfig svg,.dollfig img{width:100%;height:100%;display:block;object-fit:cover;object-position:50% 100%}
+.dollside{display:flex;flex-direction:column;gap:5px;align-items:stretch;font-size:13px;min-width:0}
+.nameplate{display:grid;grid-template-columns:auto 1fr;column-gap:6px;align-items:center;border-bottom:1px solid #cfcbc2;padding-bottom:6px;margin-bottom:2px}
+.nameplate .zh{grid-row:span 2;font-size:28px;color:#a3282f;line-height:1}
+.nameplate b{font-size:16px;line-height:1.05;color:#2a2826}
+.nameplate small{font-size:11px;color:#8a857b}
+.slotlab{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8a857b}
+.stats{display:flex;justify-content:space-between;gap:6px;margin-top:auto;font-variant-numeric:tabular-nums}
+.dollside .gold{color:#9a7a3a}
+.slot{background:radial-gradient(circle at 50% 40%,#f7f6f2,#e1ded6);border:1px solid #b9b3a6;border-radius:3px;display:grid;place-items:center;color:#a39d91;font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:4px;position:relative}
 .slot svg{width:100%;height:100%;display:block}
-.slot.wslot{aspect-ratio:1/2;width:100%}
-.slot.cslot{aspect-ratio:1;width:64%}
+.slot.wslot{aspect-ratio:1/2;width:50%}
+.slot.cslot{aspect-ratio:1;width:42%}
 .slot.bslot{aspect-ratio:1}
-.slot.can{border-color:#6fbf9a;box-shadow:0 0 0 1px #6fbf9a,inset 0 0 12px #6fbf9a44}
+.slot.can{border-color:var(--jade);box-shadow:0 0 0 1px var(--jade),inset 0 0 12px #4f7d6a33}
 .slot.locked{opacity:.6}
-.slot.held,.gitem.held{outline:2px solid #e7c873;outline-offset:1px;box-shadow:0 0 12px #e7c87388}
-.beltrow{display:flex;gap:10px;align-items:center;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8f8068}
+.slot.held,.gitem.held{outline:2px solid #a3282f;outline-offset:1px;box-shadow:0 0 10px #a3282f55}
+.beltrow{display:flex;gap:10px;align-items:center;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8a857b}
 .belt{flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,44px));gap:6px}
 .igrid{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));grid-auto-rows:auto;gap:2px}
-.icell{aspect-ratio:1;background:#191411;border:1px solid #3a2f25;border-radius:2px;padding:0;min-width:0}
-.icell.ok{background:#2c4a3a;border-color:#6fbf9a}.icell.bad{background:#5a2a24;border-color:#c46a5a}
-.gitem{z-index:1;background:radial-gradient(circle at 50% 40%,#3d332b,#261f1b);border:1px solid #7a5c32;border-radius:3px;padding:2px;display:grid;place-items:center;min-width:0}
+.icell{aspect-ratio:1;background:#dcd9d1;border:1px solid #c6c1b5;border-radius:2px;padding:0;min-width:0}
+.icell.ok{background:#bcd3c4;border-color:var(--jade)}.icell.bad{background:#e2b9b2;border-color:#a3282f}
+.gitem{z-index:1;background:radial-gradient(circle at 50% 40%,#fbfaf7,#e6e2da);border:1px solid #9e978a;border-radius:3px;padding:2px;display:grid;place-items:center;min-width:0}
 .gitem svg{width:100%;height:100%;display:block}
 .igrid.holding .gitem:not(.held){pointer-events:none}
 .igrid.holding .gitem.held{pointer-events:none;opacity:.55}
@@ -1214,7 +1222,7 @@ function invMove(src,t,x,y){
   if(!ok){G.bag=JSON.parse(snap);return 'There is no room for that.'}
   G.hp=Math.min(G.hp,maxHp());return null;
 }
-const IC={blade:'#e8edf0',edge:'#8d949a',wood:'#8a6a4a',grip:'#3a2a1c'};
+const IC={blade:'#c3c9ce',edge:'#4e555b',wood:'#7a5a3a',grip:'#2e241c'};
 const ICON={
   jian:`<path d="M5 1.5 L5 20" stroke="${IC.blade}" stroke-width="1.6"/><path d="M5 1.5 L5 20" stroke="${IC.edge}" stroke-width=".35"/><path d="M1.6 20.4 H8.4" stroke="${GOLD}" stroke-width="1.5"/><path d="M5 21 V27" stroke="${IC.grip}" stroke-width="1.9"/><circle cx="5" cy="27.8" r="1.1" fill="${GOLD}"/><path d="M5 28.6 Q3 29.5 3.4 29.8 M5 28.6 Q6.6 29.5 6.3 29.9" stroke="${RED}" stroke-width=".7"/>`,
   dao:`<path d="M8 21 Q3 10 15.5 2 Q14.5 11 12 21Z" fill="${IC.blade}" stroke="${IC.edge}" stroke-width=".4"/><circle cx="10" cy="22.4" r="1.9" fill="none" stroke="${GOLD}" stroke-width="1"/><path d="M10 24.2 L9 29" stroke="${IC.grip}" stroke-width="2"/><path d="M9.2 28.2 Q5 29.4 3.6 27.4" stroke="${RED}" stroke-width=".8" fill="none"/>`,
@@ -1222,7 +1230,7 @@ const ICON={
   staff:`<path d="M5 1.5 V38.5" stroke="${IC.wood}" stroke-width="2.2"/><path d="M3.6 5 H6.4 M3.6 35 H6.4" stroke="${GOLD}" stroke-width="2"/>`,
   fan:`<path d="M10 17.5 L1.6 9 A11.8 11.8 0 0 1 18.4 9Z" fill="#f3ecde" stroke="#5a4a3a" stroke-width=".5"/><path d="M10 17.5 L5 5 M10 17.5 L10 3.4 M10 17.5 L15 5" stroke="#5a4a3a" stroke-width=".3"/><circle cx="12.4" cy="8" r="1.8" fill="${RED}"/><circle cx="10" cy="17.5" r=".9" fill="${GOLD}"/>`,
   hooks:`<path d="M5.5 28 V9 Q5.5 3 10 3.4 Q12 5 9.2 7" stroke="${IC.blade}" stroke-width="1.3" fill="none"/><path d="M14.5 28 V9 Q14.5 3 19 3.4 Q20 5.6 17.6 7" stroke="${IC.blade}" stroke-width="1.3" fill="none"/><path d="M3.4 21 Q5.5 23 7.6 21 M12.4 21 Q14.5 23 16.6 21" stroke="${GOLD}" stroke-width=".9" fill="none"/>`,
-  jade:`<path d="M5 .6 V2.4" stroke="${RED}" stroke-width=".7"/><circle cx="5" cy="5.6" r="3.4" fill="#7fb89a"/><circle cx="5" cy="5.6" r="1.1" fill="#221c18"/><path d="M3.2 4.2 A2.4 2.4 0 0 1 5.6 3.2" stroke="#d6eee0" stroke-width=".4" fill="none"/>`,
+  jade:`<path d="M5 .6 V2.4" stroke="${RED}" stroke-width=".7"/><circle cx="5" cy="5.6" r="3.4" fill="#7fb89a"/><circle cx="5" cy="5.6" r="1.1" fill="#efece6"/><path d="M3.2 4.2 A2.4 2.4 0 0 1 5.6 3.2" stroke="#d6eee0" stroke-width=".4" fill="none"/>`,
   bagua:`<path d="M3.6 1.6 H6.4 L8.4 3.6 V6.4 L6.4 8.4 H3.6 L1.6 6.4 V3.6Z" fill="#b9a46a" stroke="${GOLD}" stroke-width=".4"/><circle cx="5" cy="5" r="1.8" fill="#dfe6ea"/>`,
   lantern:`<path d="M5 .4 V3" stroke="#c9b89a" stroke-width=".4"/><rect x="3" y="3" width="4" height="1.2" fill="#2a1d16"/><ellipse cx="5" cy="10" rx="3.7" ry="5.6" fill="${RED}"/><path d="M5 4.6 V15.4 M2.4 10 H7.6" stroke="#7a2018" stroke-width=".3"/><rect x="3" y="15.6" width="4" height="1.1" fill="#2a1d16"/><path d="M5 16.8 V19.6" stroke="${GOLD}" stroke-width=".8"/>`,
   shell:`<ellipse cx="10" cy="11" rx="7.6" ry="6.6" fill="#6f7a5a" stroke="#3a4030" stroke-width=".5"/><path d="M10 6.6 L12.6 8.4 L12.6 11.6 L10 13.4 L7.4 11.6 L7.4 8.4Z M10 4.4 V6.6 M12.6 8.4 L16 7 M12.6 11.6 L16.4 13.4 M10 13.4 V17.6 M7.4 11.6 L3.6 13.4 M7.4 8.4 L4 7" stroke="#b9c39a" stroke-width=".45" fill="none"/><circle cx="10" cy="3.2" r="1.3" fill="#6f7a5a"/>`,
@@ -1236,6 +1244,87 @@ function slotHTML(t,o,label,cls){
   const held=UI.held===t,h=UI.held?invGet(UI.held):null;
   const can=h&&!held&&accepts(t,h)&&!lockedSlot(t)&&!lockedSlot(UI.held);
   return `<button class="slot ${cls} ${held?'held':''} ${can?'can':''} ${lockedSlot(t)?'locked':''}" data-act="islot" data-i="${t}" aria-label="${o?itemDef(o).name:label}">${o?iconSVG(o):`<span>${label}</span>`}</button>`;
+}
+// Full-length hero portrait: pale ground, grey band, silver reeds, sparrows; black outer robe over white, red ties; weapon worn on the back.
+function reedsSVG(r,n,x0,x1,col,op,hmin,hmax,w){
+  let o='';for(let i=0;i<n;i++){const x=x0+r()*(x1-x0),h=hmin+r()*(hmax-hmin),bd=(r()-.35)*h*.5;
+    const P=t=>[(1-t)*(1-t)*x+2*(1-t)*t*(x+bd*.25)+t*t*(x+bd),(1-t)*(1-t)*440+2*(1-t)*t*(440-h*.6)+t*t*(440-h)];
+    const e=P(1);o+=`<path d="M${x.toFixed(1)} 440 Q${(x+bd*.25).toFixed(1)} ${(440-h*.6).toFixed(1)} ${e[0].toFixed(1)} ${e[1].toFixed(1)}" stroke="${col}" stroke-width="${w}" fill="none" opacity="${op}"/>`;
+    for(let t=.74;t<=1;t+=.022){const [px,py]=P(t),a=(r()-.5)*1.6-(bd>0?.5:-.5)-1.2,l=6+r()*11;
+      o+=`<path d="M${px.toFixed(1)} ${py.toFixed(1)} q${(Math.cos(a)*l*.5).toFixed(1)} ${(Math.sin(a)*l*.3).toFixed(1)} ${(Math.cos(a)*l).toFixed(1)} ${(Math.sin(a)*l).toFixed(1)}" stroke="${col}" stroke-width="${(w*.55).toFixed(2)}" fill="none" opacity="${(op*.8).toFixed(2)}"/>`}
+    // leaf blades
+    o+=`<path d="M${x.toFixed(1)} 440 Q${(x-bd*.4+10).toFixed(1)} ${(440-h*.35).toFixed(1)} ${(x-bd*.6+18).toFixed(1)} ${(440-h*.45).toFixed(1)}" stroke="${col}" stroke-width="${(w*.7).toFixed(2)}" fill="none" opacity="${(op*.7).toFixed(2)}"/>`}
+  return o;
+}
+function sparrow(x,y,s,a,fly){
+  return `<g transform="translate(${x} ${y}) rotate(${a}) scale(${s})">${fly?`<path d="M-2 -1 Q-8 -12 -16 -10 Q-8 -6 -3 1Z M1 -1 Q6 -12 14 -13 Q8 -6 3 1Z" fill="#6f6252"/>`:''}<ellipse rx="6" ry="3.4" fill="#8a7a66"/><path d="M-1 1.6 Q2 3.6 6 1.4" stroke="#e8e2d6" stroke-width="1" fill="none"/><circle cx="5.4" cy="-2" r="2.5" fill="#6a5a48"/><path d="M7.6 -2.2 L10 -1.6 L7.6 -1Z" fill="#3a3026"/><path d="M-5 -.5 L-12 -2.4 L-11 1.8Z" fill="#5a4c3c"/>${fly?'':`<path d="M-1 3 L-2 6 M2 3 L2 6" stroke="#4a3e32" stroke-width=".6"/>`}</g>`;
+}
+function backWeapon(w){
+  switch(w){
+    case 'jian':return `<path d="M112 64 L200 246" stroke="#252322" stroke-width="7.5" stroke-linecap="round"/><path d="M130 101 L136 113 M182 208 L188 220" stroke="#9a7a3a" stroke-width="8.5"/><path d="M98 38 L110 62" stroke="#3a2e26" stroke-width="5.5" stroke-linecap="round"/><path d="M103 64 L117 56" stroke="#7a6a50" stroke-width="4" stroke-linecap="round"/><circle cx="96" cy="34" r="3.6" fill="none" stroke="#3a2e26" stroke-width="2"/><path d="M94 37 Q86 52 90 66 M95 37 Q92 50 97 60" stroke="#a3282f" stroke-width="1.6" fill="none"/>`;
+    case 'dao':return `<path d="M112 64 Q170 130 204 244" stroke="#252322" stroke-width="11" stroke-linecap="round" fill="none"/><path d="M98 38 L110 62" stroke="#3a2e26" stroke-width="6.5" stroke-linecap="round"/><ellipse cx="110" cy="63" rx="6" ry="3" fill="#9a7a3a"/><path d="M96 40 Q84 44 80 58" stroke="#a3282f" stroke-width="2" fill="none"/>`;
+    case 'spear':return `<path d="M84 22 L226 430" stroke="#6e5238" stroke-width="4"/><path d="M84 22 L78 2 L90 18Z" fill="#c3c9ce" stroke="#4e555b" stroke-width=".8"/><path d="M86 26 Q76 40 78 52 M86 26 Q84 42 90 52 M86 26 Q92 38 96 46" stroke="#a3282f" stroke-width="2" fill="none"/>`;
+    case 'staff':return `<path d="M80 18 L228 430" stroke="#6e5238" stroke-width="6"/><path d="M83 26 L87 37 M218 400 L222 411" stroke="#9a7a3a" stroke-width="8"/>`;
+    case 'hooks':return `<path d="M108 66 L188 238 M196 70 L128 236" stroke="#252322" stroke-width="5"/><path d="M106 62 L96 36 Q94 26 104 24 Q110 26 106 32 M198 66 L208 40 Q210 30 200 28 Q194 30 198 36" stroke="#c3c9ce" stroke-width="2.6" fill="none"/>`;
+    default:return '';
+  }
+}
+function heroPortrait(w){
+  if(ART_IMAGES['portrait:hero'])return `<img src="${ART_IMAGES['portrait:hero']}" alt="The Wanderer">`;
+  const r=rng(56),k='hp'+(++artN);
+  const fan=w==='fan'?`<path d="M144 172 L128 128 L135 125 L151 168Z" fill="#2a2624"/><path d="M130 130 L149 170" stroke="#9a7a3a" stroke-width=".8"/><circle cx="148" cy="169" r="1.6" fill="#9a7a3a"/>`:'';
+  return `<svg viewBox="0 0 300 440" preserveAspectRatio="xMidYMax slice" aria-label="The Wanderer, full-length portrait"><defs>
+    <linearGradient id="${k}w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbfaf8"/><stop offset="1" stop-color="#d6d4cf"/></linearGradient>
+    <linearGradient id="${k}b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b3b3f"/><stop offset=".55" stop-color="#1f1f22"/><stop offset="1" stop-color="#2a2a2e" stop-opacity=".45"/></linearGradient>
+    <linearGradient id="${k}s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4ece6"/><stop offset="1" stop-color="#e8d9cf"/></linearGradient></defs>
+  <rect width="300" height="440" fill="#ecebe7"/>
+  <rect x="190" width="72" height="440" fill="#a8aaa6" opacity=".55"/>
+  <g filter="url(#cl-wash)" opacity=".5"><ellipse cx="60" cy="380" rx="90" ry="60" fill="#d4d2cc"/></g>
+  ${reedsSVG(r,10,0,300,'#a9aaa5',.55,180,380,1.4)}
+  ${backWeapon(w)}
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <path d="M131 78 C118 102 116 152 110 202 C106 240 100 272 94 294 C112 280 121 252 125 222 C129 182 131 152 135 128Z" fill="#1d1c1c"/>
+    <path d="M169 78 C182 102 186 152 191 198 C195 238 203 264 210 284 C192 272 183 248 178 216 C174 178 170 150 166 128Z" fill="#1d1c1c"/>
+    <ellipse cx="150" cy="86" rx="25" ry="25" fill="#1d1c1c"/>
+    <path d="M120 141 Q150 132 180 141 L176 300 L192 440 L110 440 L124 300Z" fill="url(#${k}w)" stroke="#a9a69f" stroke-width=".6"/>
+    <path d="M140 230 L134 440 M158 230 L166 440 M150 236 V440" stroke="#bdbab3" stroke-width=".8" fill="none"/>
+    <path d="M124 300 L120 440 M176 300 L182 440" stroke="#a3282f" stroke-width="3" opacity=".75"/>
+    <path d="M137 137 L150 170 L163 137" stroke="#a3282f" stroke-width="4" fill="none"/>
+    <path d="M135 135 L150 165 L165 135" stroke="#fbfaf8" stroke-width="2.2" fill="none"/>
+    <path d="M126 197 Q150 203 174 197 L174 213 Q150 219 126 213Z" fill="#a3282f"/>
+    <path d="M124 217 Q150 224 176 217" stroke="#2a2826" stroke-width="4" fill="none"/>
+    <circle cx="160" cy="220" r="2.6" fill="none" stroke="#9a7a3a" stroke-width="1.2"/>
+    <path d="M143 214 C138 240 146 262 138 300 C134 318 140 330 136 342 M157 214 C160 236 154 256 162 290" stroke="#a3282f" stroke-width="2.4" fill="none"/>
+    <path d="M162 210 L216 266" stroke="#252322" stroke-width="6"/><path d="M168 216 L173 221 M206 256 L211 261" stroke="#9a7a3a" stroke-width="7"/>
+    <path d="M118 138 C104 160 98 240 92 330 C88 380 84 420 76 440 L124 440 C122 380 126 300 132 236 C134 200 132 168 130 150Z" fill="url(#${k}b)"/>
+    <path d="M182 138 C196 160 204 240 210 330 C214 380 220 420 228 440 L180 440 C180 380 174 300 168 236 C166 200 168 168 170 150Z" fill="url(#${k}b)"/>
+    <path d="M108 250 C104 310 98 370 92 430 M198 250 C204 310 210 370 216 430 M118 200 C114 260 110 330 106 400" stroke="#6a6a70" stroke-width=".8" fill="none" opacity=".6"/>
+    <path d="M184 140 C200 152 210 200 213 258 C215 288 207 300 196 296 C192 262 188 222 178 190Z" fill="url(#${k}b)"/>
+    <path d="M196 296 Q202 300 210 292" stroke="#fbfaf8" stroke-width="2" fill="none"/>
+    <path d="M116 140 C100 150 92 190 90 240 C88 262 96 278 108 272 C118 252 124 214 136 186 L142 177 C138 166 130 150 116 140Z" fill="url(#${k}b)"/>
+    <path d="M116 140 C130 150 138 164 142 177" stroke="#7a7a80" stroke-width="1.2" fill="none"/><path d="M100 200 C98 220 98 244 102 262" stroke="#6a6a70" stroke-width=".8" fill="none" opacity=".6"/>
+    <path d="M133 182 L145 171 L150 180 L139 191Z" fill="#f4f3f0"/>
+    ${w==='jian'||w==='dao'||w==='hooks'?`<path d="M146 166 L116 90" stroke="#4a3a2c" stroke-width="1.6"/>`:''}
+    ${fan}
+    <ellipse cx="148" cy="171" rx="6" ry="7" fill="url(#${k}s)" stroke="#c9b0a6" stroke-width=".5"/>
+    <path d="M144 166 Q147 163 152 165 M144 169 Q148 167 153 168" stroke="#c9b0a6" stroke-width=".6" fill="none"/>
+    <rect x="144" y="116" width="12" height="20" fill="url(#${k}s)"/>
+    <ellipse cx="150" cy="100" rx="17.5" ry="22.5" fill="url(#${k}s)"/>
+    <ellipse cx="141" cy="108" rx="4" ry="2.2" fill="#e6b0aa" opacity=".35"/><ellipse cx="159" cy="108" rx="4" ry="2.2" fill="#e6b0aa" opacity=".35"/>
+    <path d="M137.5 98.5 Q142 95 146.5 98.2 Q142 100.4 137.5 98.5Z" fill="#2a2423"/><path d="M153.5 98.2 Q158 95 162.5 98.5 Q158 100.4 153.5 98.2Z" fill="#2a2423"/>
+    <circle cx="142.6" cy="97.8" r=".7" fill="#fff"/><circle cx="158.6" cy="97.8" r=".7" fill="#fff"/>
+    <path d="M136 92 Q141 89 146 91 M154 91 Q159 89 164 92" stroke="#3a3230" stroke-width="1.1" fill="none"/>
+    <path d="M150 103 L149 108.6 L151.4 109.2" stroke="#c4a79c" stroke-width=".7" fill="none"/>
+    <path d="M146.2 115 Q150 113.2 153.8 115 Q150 118 146.2 115Z" fill="#a3282f"/>
+    <path d="M125 94 C124 68 139 59 150 59 C162 59 177 68 176 94 C169 81 159 75 150 77 C142 75 132 81 125 94Z" fill="#1d1c1c"/>
+    <path d="M128 88 C123 106 125 122 131 136 C131 118 129 102 134 88Z M172 88 C177 106 175 122 169 136 C169 118 171 102 166 88Z" fill="#1d1c1c"/>
+    <path d="M130 120 C120 150 112 176 98 196 M171 118 C182 146 192 170 204 186 M134 80 C120 96 108 120 92 132" stroke="#1d1c1c" stroke-width=".8" fill="none" opacity=".75"/>
+    <path d="M171 78 L178 74 L176 82Z" fill="#a3282f"/><path d="M175 80 C186 94 184 112 196 126 M175 80 C190 88 196 100 210 104" stroke="#a3282f" stroke-width="1.4" fill="none"/>
+  </g>
+  ${reedsSVG(r,5,180,300,'#8f908b',.5,140,300,1.2)}
+  ${sparrow(236,212,1.3,-6)}${sparrow(262,138,1.1,8)}${sparrow(222,300,1.2,-14,1)}${sparrow(248,92,1,-20,1)}${sparrow(40,250,1.1,4)}${sparrow(70,330,1.2,-10,1)}
+  <g transform="translate(18 400)"><rect width="16" height="16" rx="1.5" fill="#a3282f" opacity=".85"/><text x="8" y="12.6" font-size="12" text-anchor="middle" fill="#f6efe4" font-family="Ma Shan Zheng,KaiTi,STKaiti,serif">旅</text></g>
+  </svg>`;
 }
 function renderBag(){
   const b=G.bag,inC=G.screen==='combat',h=UI.held?invGet(UI.held):null;
@@ -1261,9 +1350,13 @@ function renderBag(){
   return `<h3>The Wanderer's bag</h3>
   <div class="chest">
     <div class="doll">
-      ${slotHTML('eqW',b.eqW,'Weapon','wslot')}
-      <div class="dollfig">${fighter(LOOKS.hero,wId())}</div>
-      <div class="dollside">${slotHTML('eqC',b.eqC,'Talisman','cslot')}<div class="gold">${G.taels} 兩</div><div class="hp">${G.hp}/${maxHp()} HP</div></div>
+      <div class="dollfig">${heroPortrait(wId())}</div>
+      <div class="dollside">
+        <div class="nameplate"><span class="zh">旅</span><b>The Wanderer</b><small>56 · The Wanderer</small></div>
+        <div class="slotlab">Weapon</div>${slotHTML('eqW',b.eqW,'Empty','wslot')}
+        <div class="slotlab">Talisman</div>${slotHTML('eqC',b.eqC,'Empty','cslot')}
+        <div class="stats"><span>${G.hp}/${maxHp()} HP</span><span class="gold">${G.taels} 兩</span></div>
+      </div>
     </div>
     <div class="beltrow"><span>Belt</span><div class="belt">${belt}</div></div>
     <div class="igrid ${UI.held?'holding':''}">${cells}${items}</div>
