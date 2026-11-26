@@ -3,7 +3,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Ma+Shan+Zheng&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@400;600;700&display=swap">
 <style>
 /* Layout: one portrait column. A watercolour duel scene on top (foe far right, hero near left, Pokémon-style),
    then the stance strip, the preview, and a hand of silk technique slips.
@@ -13,7 +13,9 @@
   --fg:#26231f; --mute:#7f776a;
   --paper:#fcf9f3; --paper-ink:#26231f; --paper-mute:#857d70;
   --cin:#b23a2e; --gold:#a8823f; --jade:#4f7d6a; --azure:#56708f; --plum:#7f6a7c; --stone:#968e80;
-  --f-ui:'Barlow Condensed','Arial Narrow',system-ui,sans-serif;
+  --t-flow:#5c7d70; --t-rev:#b23a2e; --t-mirror:#3f5578; --t-still:#a8823f; --t-step:#7a746a; --t-break:#3f3b36;
+  --f-ui:'Noto Serif TC','Songti TC','Noto Serif',Georgia,serif;
+  --f-num:'Barlow Condensed','Arial Narrow',system-ui,sans-serif;
   --f-brush:'Ma Shan Zheng','STKaiti','KaiTi','Kaiti SC',serif;
   color-scheme:light;
 }
@@ -24,14 +26,106 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--gold);outl
 #app{max-width:560px;min-height:100%;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px 14px;display:flex;flex-direction:column;gap:9px}
 .zh{font-family:var(--f-brush);font-weight:400}
 .mute{color:var(--mute)}
-.btn{background:var(--panel2);border:1px solid var(--rule);border-radius:6px;padding:9px 14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:15px}
+.btn{background:var(--panel2);border:1px solid var(--rule);border-radius:4px;padding:9px 14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:14px}
 .btn:hover{border-color:var(--mute)}
 .btn{white-space:nowrap}
-.btn.primary{background:var(--cin);border-color:var(--cin);color:#fff}
+.btn.primary{background:var(--cin);border-color:var(--cin);color:#fbf4e8;border-radius:3px;box-shadow:inset 0 0 0 2px var(--cin),inset 0 0 0 3.5px #fbf4e866;font-weight:700;letter-spacing:.12em}
+.btn.primary:not(:disabled):active{transform:rotate(-1.5deg) scale(.97)}
 .btn.small{padding:5px 10px;font-size:13px}
+.screen .btn{white-space:normal;text-align:center}
 .btn:disabled{opacity:.4;cursor:default}
 .btn.on{border-color:var(--gold);color:var(--gold)}
 
+/* ---- combat UI v2 ---- */
+.num,.cost,.hpb span,.st b,.piles,.tcost,.mom b{font-family:var(--f-num)}
+.topbar{display:flex;align-items:center;gap:6px}
+.map{width:132px;height:30px;flex:none}
+.map text{font-family:var(--f-brush);font-size:11px}
+.topbar .sp{flex:1}
+.ibtn{display:flex;flex-direction:column;align-items:center;gap:1px;padding:2px 4px;border-radius:4px;color:var(--fg);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase}
+.ibtn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.ibtn:hover{background:var(--panel2)}
+.plate{position:absolute;z-index:3;display:flex;flex-direction:column;gap:2px;padding:4px 8px 5px;background:linear-gradient(90deg,#fbf8f2ee,#fbf8f2aa 75%,#fbf8f200);border-left:3px solid var(--fg)}
+.plate.foe{left:0;top:6px;min-width:52%;max-width:62%}
+.plate.hero{right:0;bottom:6px;min-width:48%;max-width:60%;border-left:0;border-right:3px solid var(--cin);background:linear-gradient(270deg,#fbf8f2ee,#fbf8f2aa 75%,#fbf8f200);align-items:flex-end;text-align:right}
+.plate .nm{display:flex;gap:6px;align-items:baseline;white-space:nowrap}
+.plate .nm b{font-size:15px;font-weight:700}
+.plate .nm small{font-size:10.5px;color:var(--mute);overflow:hidden;text-overflow:ellipsis}
+.plate .hpb{width:100%}
+.plate.hero .hpb{flex-direction:row-reverse}
+.bbar{flex:1;height:11px;min-width:60px;overflow:visible}
+.bbar path{fill:none;stroke-linecap:round;stroke-width:6px;vector-effect:non-scaling-stroke}
+.bbar .bg{stroke:#d8d0c2}
+.bbar .fg{stroke:var(--cin);transition:stroke-dasharray .35s;filter:url(#cl-brush)}
+.bbar.me .fg{stroke:var(--fg)}
+.sts{display:flex;gap:3px;flex-wrap:wrap}
+.plate.hero .sts{justify-content:flex-end}
+.st{display:inline-flex;align-items:center;gap:1px;padding:0 4px 0 3px;border-radius:3px;background:#fbf8f2;border:1px solid var(--rule);font-size:12px;line-height:18px}
+.st .zh{font-size:13px}
+.st b{font-size:12px}
+.st.blk{color:var(--t-mirror)}.st.str{color:var(--cin)}.st.burn{color:#b8642a}.st.good{color:var(--t-flow)}.st.gold{color:var(--gold)}
+.intentbub{position:absolute;z-index:3;right:6%;top:2%;display:flex;align-items:center;gap:4px;padding:2px 8px 2px 6px;background:#fbf8f2;border:1.5px solid var(--fg);border-radius:12px 12px 12px 2px;font-weight:700;font-size:14px;box-shadow:0 2px 6px #3a332a22}
+.intentbub .zh{font-size:15px;color:var(--cin)}
+.intentbub b{font-family:var(--f-num);font-size:16px}
+.intentbub.cut{border-color:var(--t-flow);opacity:.75}.intentbub.cut b{text-decoration:line-through}
+.trflash{position:absolute;left:50%;top:44%;z-index:6;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;pointer-events:none;animation:trf .9s ease-out forwards;color:var(--tc)}
+.trflash .zh{font-size:72px;line-height:1;text-shadow:0 0 12px #fbf8f2,0 0 3px #fbf8f2}
+.trflash small{font-size:12px;letter-spacing:.3em;text-transform:uppercase;font-weight:700}
+@keyframes trf{0%{opacity:0;transform:translate(-50%,-50%) scale(1.5)}25%{opacity:1;transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-56%) scale(.95)}}
+.splash{position:absolute;z-index:5;pointer-events:none;animation:spl .7s ease-out forwards}
+@keyframes spl{0%{opacity:0;transform:scale(.4)}20%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.15)}}
+.formfx{position:fixed;inset:0;z-index:40;background:#f3eee4e6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;animation:ffx 2s ease forwards;cursor:pointer}
+.formfx .row{display:flex;gap:14px;align-items:center}
+.formfx .hx{display:flex;flex-direction:column;align-items:center;gap:6px;opacity:0;animation:ffi .4s ease forwards}
+.formfx .hx .zh{font-size:22px}
+.formfx .arrow{color:var(--mute);font-size:20px}
+.formfx .seal{animation:stamp .5s .9s cubic-bezier(.2,1.6,.4,1) both;font-size:30px;width:auto;height:auto;padding:10px 16px;font-family:var(--f-brush)}
+.formfx .lbl{font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--mute);animation:ffi .4s 1.2s both}
+@keyframes ffx{0%{opacity:0}10%{opacity:1}85%{opacity:1}100%{opacity:0;visibility:hidden}}
+@keyframes ffi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes stamp{from{opacity:0;transform:rotate(-3deg) scale(2.4)}to{opacity:1;transform:rotate(-3deg) scale(1)}}
+.stance2{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px}
+.medal{position:relative;width:112px;height:112px;border-radius:50%;background:radial-gradient(circle,#fbf8f2 0 52%,#efe9de 53% 70%,#e5dece 71%);box-shadow:0 0 0 1px var(--rule),0 3px 10px #3a332a1a;display:grid;place-items:center}
+.medal .tri{position:absolute;font-size:12px;color:#a59d8f;line-height:1}
+.medal .tri.on{color:var(--fg);font-weight:700}
+.medal .core{position:relative;display:grid;place-items:center}
+.hex.med{--w:48px;--h:5px;color:var(--fg)}
+.hex.med .ln i{border-radius:2px 1px 2px 1px}
+.medal.t-flow,.medal.t-rev,.medal.t-mirror,.medal.t-still,.medal.t-step,.medal.t-break{box-shadow:0 0 0 2px var(--tc),0 3px 12px #3a332a22}
+.sname{text-align:center;line-height:1.1;margin-top:3px}
+.sname .zh{font-size:18px}
+.sname small{display:block;font-size:11px;color:var(--mute)}
+.lants{display:flex;gap:3px;align-items:flex-end}
+.lant{width:16px;height:25px}
+.lant path,.lant rect{stroke:#7a746a;stroke-width:.8;fill:none}
+.lant .body{fill:none;stroke:#9b9487;stroke-width:1}
+.lant.lit .body{fill:var(--cin);stroke:#7a2018}
+.lant.lit{filter:drop-shadow(0 0 4px #e0754a)}
+.lant .rib{stroke:#9b9487;stroke-width:.5}.lant.lit .rib{stroke:#7a2018}
+.lant .tas{stroke:var(--gold);stroke-width:1.2}
+.mom2{display:flex;align-items:baseline;gap:4px}
+.mom2 .zh{font-size:30px;color:var(--cin);line-height:1}
+.mom2 b{font-size:24px}
+.logline{font-size:14px;color:var(--mute);min-height:38px;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 6px}
+.tip{background:var(--panel);border:1px solid var(--rule);border-left:4px solid var(--tc,var(--fg));border-radius:6px;padding:7px 10px;display:flex;flex-direction:column;gap:2px;box-shadow:0 4px 14px #3a332a1a;font-size:13px;line-height:1.35;position:relative}
+.tip-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.tip-h b{font-size:16px}
+.tip-h .hx{font-size:12px;color:var(--mute)}.tip-h .hx .zh{font-size:14px;color:var(--fg)}
+.tcost{margin-left:auto;font-weight:700;color:var(--cin)}
+.tip-tr{display:block;font-size:12.5px}
+.tip-tr .zh{font-size:17px;color:var(--tc);line-height:1;margin-right:4px}
+.tip-tr b{color:var(--tc);margin-right:4px}
+.tip-f{font-size:12px;color:var(--mute);margin-top:2px}
+.tip-f.no{color:var(--cin)}
+.fan{display:flex;justify-content:center;align-items:flex-end;padding:18px 14px 16px;min-height:150px;overflow-x:clip}
+.fan .card{flex:0 0 70px;min-width:70px;transform:translateY(var(--y)) rotate(var(--r));transform-origin:50% 120%;transition:transform .18s ease}
+.fan .card+.card{margin-left:min(5px,var(--ov))}
+.fan .card.sel{transform:translateY(-18px) scale(1.12) rotate(0);z-index:6;box-shadow:0 10px 24px #3a332a40}
+@media (hover:hover){.fan .card:not(.sel):hover{transform:translateY(calc(var(--y) - 8px)) rotate(var(--r));z-index:5}}
+.card .nm{font-family:var(--f-ui)}
+.card .cost{border-radius:3px;transform:rotate(-7deg);border:0;box-shadow:0 0 0 1.5px var(--paper),0 0 0 2.5px var(--cin)}
+.card .badge{clip-path:polygon(3% 12%,97% 0,100% 82%,6% 100%);padding:1px 4px 1px 3px;font-size:9px;display:flex;gap:2px;align-items:center;letter-spacing:.04em}
+.card .badge .zh{font-size:11px;line-height:1}
 /* hexagram lines */
 .hex{--w:34px;--h:4px;display:flex;flex-direction:column;gap:calc(var(--h)*.6);width:var(--w);color:inherit;flex:none}
 .hex .ln{display:flex;gap:calc(var(--w)*.18);height:var(--h)}
@@ -150,13 +244,14 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--gold);outl
 .flowtxt b{color:var(--jade);font-size:inherit}
 .flowtxt.on{color:var(--fg);background:color-mix(in srgb,var(--jade) 12%,transparent);border-radius:0 4px 4px 0;padding:2px 6px}
 .flowtxt span{color:var(--jade);font-weight:600}
-.t-flow{--tc:var(--jade)}.t-step{--tc:var(--stone)}.t-break{--tc:var(--plum)}.t-still{--tc:var(--gold)}.t-mirror{--tc:var(--azure)}.t-rev{--tc:var(--cin)}
+.t-flow{--tc:var(--t-flow)}.t-step{--tc:var(--t-step)}.t-break{--tc:var(--t-break)}.t-still{--tc:var(--t-still)}.t-mirror{--tc:var(--t-mirror)}.t-rev{--tc:var(--t-rev)}
 
 /* hand */
 .hand{display:flex;gap:6px;overflow-x:auto;padding:12px 2px 4px;scrollbar-width:thin}
 .hand.withnext{padding-bottom:14px}
-.card .next{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);font-size:9.5px;font-weight:700;letter-spacing:.02em;color:#fff;background:var(--tc);border:1.5px solid var(--ink);border-radius:4px;padding:0 4px;white-space:nowrap;z-index:1}
+.card .next{position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);font-family:var(--f-num);font-size:11px;font-weight:700;letter-spacing:.02em;color:#fff;background:var(--tc);border:1.5px solid var(--ink);border-radius:4px;padding:0 4px;white-space:nowrap;z-index:1}
 .card .next.no{opacity:.55;text-decoration:line-through}
+.card .next .zh{font-size:11px}
 .card{flex:0 0 calc((100% - 28px)/5);min-width:62px;background:var(--paper);color:var(--paper-ink);border-radius:6px;padding:3px 3px 5px;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;border:2px solid transparent;transition:transform .15s;box-shadow:0 3px 10px #3a332a26;border-color:#e2d9ca}
 .card .art{width:100%;display:block;border-radius:3px}
 .card.sel{border-color:var(--gold);transform:translateY(-8px)}
@@ -170,7 +265,9 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--gold);outl
 .card .hn{display:flex;gap:4px;align-items:center;font-size:11px;color:var(--paper-mute)}
 .card .hn .zh{font-size:12px;color:var(--paper-ink)}
 
-.actions{display:flex;gap:8px;align-items:center}
+.actions{display:flex;gap:6px;align-items:center}
+.actions .btn{padding:8px 10px;font-size:13px;letter-spacing:.05em}
+.pouch{min-width:0}
 .pouch{flex:1;display:flex;gap:6px;justify-content:center}
 .itm{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:19px;border:1.5px solid var(--ic,var(--gold));color:var(--ic,var(--gold));background:var(--panel2)}
 .itm.sel{background:var(--ic,var(--gold));color:var(--ink)}
@@ -196,7 +293,8 @@ button.bigcard:hover{border-color:var(--gold)}
 
 /* screens */
 .screen{display:flex;flex-direction:column;gap:14px;padding-block:6px}
-.screen h1{font-size:34px;margin:0;letter-spacing:.06em;text-transform:uppercase;font-weight:700;text-wrap:balance}
+.titlehead>div{min-width:0}
+.screen h1{font-size:clamp(22px,7.4vw,34px);overflow-wrap:anywhere;margin:0;letter-spacing:.06em;text-transform:uppercase;font-weight:700;text-wrap:balance}
 .screen h2{font-size:24px;margin:0;font-weight:700;text-wrap:balance}
 .screen h3{font-size:17px;margin:0;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
 .screen p{margin:0;font-size:16px;max-width:62ch}
@@ -314,8 +412,8 @@ th{color:var(--mute);font-weight:600;text-transform:uppercase;font-size:12px;let
 .bagtop .mini{width:96px;flex:none}
 .bagtop .mini svg{width:100%;overflow:visible}
 
-.fl{position:fixed;pointer-events:none;font-weight:700;font-size:21px;z-index:30;animation:rise 1.1s ease-out forwards;text-shadow:0 0 3px #fff,0 0 6px #fff,0 1px 2px #fff;white-space:nowrap;transform:translateX(-50%)}
-.fl.dmg{color:var(--cin)}.fl.blk{color:var(--azure)}.fl.good{color:var(--jade)}.fl.gold{color:var(--gold)}.fl.big{font-size:27px}
+.fl{position:fixed;pointer-events:none;font-family:var(--f-brush);font-weight:400;font-size:26px;z-index:30;animation:rise 1.1s ease-out forwards;text-shadow:0 0 3px #fff,0 0 6px #fff,0 1px 2px #fff;white-space:nowrap;transform:translateX(-50%)}
+.fl.dmg{color:var(--cin)}.fl.blk{color:var(--azure)}.fl.good{color:var(--jade)}.fl.gold{color:var(--gold)}.fl.big{font-size:36px}
 @keyframes rise{from{opacity:1;margin-top:0}to{opacity:0;margin-top:-50px}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
 @media (max-width:380px){.actions .btn{padding:9px 10px;font-size:14px}.itm{width:30px;height:30px;font-size:17px}.hex.big{--w:84px;--h:9px}.info .nm b{font-size:14px}.info{font-size:12px;padding:4px 6px}}
@@ -731,9 +829,9 @@ function B(x,n){const v=Math.floor(n*x.mult);G.c.block+=v;fl('me','+'+v+' Block'
 function hitFoe(d,pierce,tag){
   const f=G.c.foe;
   if(!pierce&&f.block){const a=Math.min(f.block,d);f.block-=a;d-=a}
-  f.hp=Math.max(0,f.hp-d);fl('foe',(tag?tag+' ':'')+'−'+d,'dmg big');G.c.anim.push('foeHit');
+  f.hp=Math.max(0,f.hp-d);fl('foe',(tag?tag+' ':'')+'−'+d,'dmg big');G.c.anim.push('foeHit');if(d>=12)G.c.anim.push('splashFoe');
 }
-function selfHurt(d,tag){G.hp=Math.max(0,G.hp-d);fl('me',(tag?tag+' ':'')+'−'+d,'dmg');if(G.c)G.c.anim.push('heroHit')}
+function selfHurt(d,tag){G.hp=Math.max(0,G.hp-d);fl('me',(tag?tag+' ':'')+'−'+d,'dmg');if(G.c){G.c.anim.push('heroHit');if(d>=12)G.c.anim.push('splashHero')}}
 // Yin-Yang: each point toward yang adds 4% to damage dealt AND taken; toward yin removes it from both
 const balMult=()=>G&&G.c?1+0.04*G.c.balance:1;
 function hurtMe(d){
@@ -755,6 +853,7 @@ function play(idx){
   const x={mult:1,tr,inst,momBefore:c.momentum};
   c.balance=Math.max(-12,Math.min(12,c.balance+pop(bits)-3));
   const msgs=[`${def.name}: ${trInfo(tr,inst).short.toLowerCase()}`];
+  if(tr.type!=='step'&&tr.type!=='break')c.flash={ch:TRCH[tr.type],label:TRNAME[tr.type],cls:trInfo(tr,inst).cls};
   const wp=wId();
   if(tr.type==='flow'){
     c.momentum++;const fx=lineFx(tr.line,tr.dir);msgs.push(fx.name);
@@ -794,7 +893,7 @@ function checkForms(msgs){
     if(h.slice(-3).every((n,i)=>n===f.seq[i])){
       c.formsTurn.add(f.id);c.formsDone.add(f.id);
       c.hand.push({uid:'t'+Math.random(),id:f.card,hex:CARDS[f.card].hex,temp:true,cost:0});
-      msgs.push(`Form performed: ${f.name}!`);fl('me',f.name+'!','gold big');
+      msgs.push(`Form performed: ${f.name}!`);c.formFx=f;
     }
   }
 }
@@ -968,6 +1067,21 @@ function applyAnim(){
   if(a.has('foeHit')){run(foe,'hit',a.has('heroLunge')?160:0);slash(foe,a.has('heroLunge')?160:0)}
   if(a.has('foeLunge'))run(foe,'lunge');
   if(a.has('heroHit')){run(hero,'hit',a.has('foeLunge')?170:0);slash(hero,a.has('foeLunge')?170:0)}
+  const arena=document.getElementById('arena');
+  if(a.has('splashFoe'))setTimeout(()=>inkSplash(arena,foe),180);
+  if(a.has('splashHero'))setTimeout(()=>inkSplash(arena,hero),190);
+  if(c.flash&&arena){const f=c.flash;c.flash=null;const d=document.createElement('div');d.className='trflash '+f.cls;d.innerHTML=`<span class="zh">${f.ch}</span><small>${f.label}</small>`;arena.appendChild(d);setTimeout(()=>d.remove(),950)}
+  if(c.formFx){const f=c.formFx;c.formFx=null;const d=document.createElement('div');d.className='formfx';d.setAttribute('role','status');
+    d.innerHTML=`<div class="lbl">Form performed</div><div class="row">${f.seq.map((n,i)=>`${i?'<span class="arrow">→</span>':''}<div class="hx" style="animation-delay:${i*.18}s">${hexHTML(BITS[n],'mid')}<span class="zh">${hz(n)}</span></div>`).join('')}</div><div class="seal">${f.name}</div><div class="lbl">${CARDS[f.card].name} added to your hand</div>`;
+    d.onclick=()=>d.remove();document.body.appendChild(d);setTimeout(()=>d.remove(),2000)}
+}
+function inkSplash(arena,target){
+  if(!arena||!target)return;const ar=arena.getBoundingClientRect(),r=target.getBoundingClientRect();
+  const sz=r.width*1.1,cx=r.left-ar.left+r.width/2,cy=r.top-ar.top+r.height*.42,R0=rng(Math.random()*1e9|0);
+  let blobs='';for(let i=0;i<14;i++){const a=R0()*6.28,d=R0()*42,rr=3+R0()*(i<4?16:7);blobs+=`<circle cx="${(50+Math.cos(a)*d).toFixed(1)}" cy="${(50+Math.sin(a)*d).toFixed(1)}" r="${rr.toFixed(1)}"/>`}
+  const el=document.createElement('div');el.className='splash';el.style.cssText=`left:${cx-sz/2}px;top:${cy-sz/2}px;width:${sz}px;height:${sz}px`;
+  el.innerHTML=`<svg viewBox="0 0 100 100" width="100%" height="100%"><g fill="#1f1c19" opacity=".55" filter="url(#cl-wc)">${blobs}</g></svg>`;
+  arena.appendChild(el);setTimeout(()=>el.remove(),720);
 }
 function flushFloats(){
   const list=floats;floats=[];
@@ -980,8 +1094,18 @@ function flushFloats(){
   });
 }
 function roadHTML(){return `<div class="road" aria-label="Journey">${FOES.map((f,i)=>`<span class="${i<G.fight?'done':i===G.fight?'now':''}" title="${f.school}">${f.glyph}</span>`).join('')}</div>`}
-function topHTML(){return `<div class="top">${roadHTML()}<span class="sp"></span>
-  <button class="iconbtn" data-act="m:rules">Rules</button><button class="iconbtn" data-act="m:manual">Forms</button><button class="iconbtn" data-act="m:bag">Bag</button><button class="iconbtn" data-act="m:deck">Deck</button></div>`}
+function roadMap(){
+  const xs=[12,46,80,116];
+  const nodes=FOES.map((f,i)=>{const st=i<G.fight?'done':i===G.fight?'now':'';
+    return `<g><circle cx="${xs[i]}" cy="16" r="${i===3?9:7.5}" fill="${st==='done'?'#26231f':'#fbf8f2'}" stroke="${st==='now'?'#b23a2e':'#7a746a'}" stroke-width="${st==='now'?2:1}"/><text x="${xs[i]}" y="19.6" text-anchor="middle" fill="${st==='done'?'#fbf8f2':st==='now'?'#b23a2e':'#7a746a'}">${f.glyph}</text><title>${f.school}</title></g>`}).join('');
+  return `<svg class="map" viewBox="0 0 132 30" role="img" aria-label="Journey: duel ${G.fight+1} of ${FOES.length}"><path d="M22 26 l8 -12 l7 9 l6 -6 l9 9 M90 26 l10 -15 l8 10 l6 -5 l8 10" fill="none" stroke="#c9c1b2" stroke-width="1"/><path d="M12 16 C24 6 34 24 46 16 S68 8 80 16 S104 24 116 16" fill="none" stroke="#7a746a" stroke-width="1" stroke-dasharray="2 2.5"/>${nodes}</svg>`;
+}
+const ICONS={
+  rules:'<rect x="5" y="4.5" width="12" height="13" rx="1"/><path d="M3.5 4.5h15M3.5 17.5h15M8 8.5h6M8 11h6M8 13.5h4"/>',
+  forms:'<path d="M3 5c2.6-1.2 5.4-1.2 8 .9 2.6-2.1 5.4-2.1 8-.9v12c-2.6-1.2-5.4-1.2-8 .9-2.6-2.1-5.4-2.1-8-.9z"/><path d="M11 5.9v12"/>',
+  bag:'<path d="M5 8h12l-1.2 10H6.2z"/><path d="M8 8V6.4a3 3 0 0 1 6 0V8"/>',
+  deck:'<rect x="3.5" y="5" width="9" height="13" rx="1" transform="rotate(-9 8 11.5)"/><rect x="9.5" y="4" width="9" height="13" rx="1" transform="rotate(8 14 10.5)"/>'};
+function topHTML(){return `<div class="topbar">${roadMap()}<span class="sp"></span>${[['rules','Rules'],['manual','Forms'],['bag','Bag'],['deck','Deck']].map(([k,l])=>`<button class="ibtn" data-act="m:${k}" aria-label="${l}" title="${l}"><svg viewBox="0 0 22 22">${ICONS[k==='manual'?'forms':k]}</svg>${l}</button>`).join('')}</div>`}
 
 function renderTitle(){
   return `<div class="screen">
@@ -1011,104 +1135,106 @@ function renderArms(){
     <div class="wgrid">${['jian','dao','spear','fan'].map(id=>weaponTile(id,{btn:true,act:'arm',sel:UI.arm===id})).join('')}</div>
     <div><button class="btn primary" data-act="go">Set out with the ${WEAPONS[UI.arm].name}</button></div></div>`;
 }
-function statusChips(){
-  const c=G.c,a=[];
-  if(c.block)a.push(`<span class="chip blk">Block ${c.block}</span>`);
-  if(c.str+c.tempStr)a.push(`<span class="chip str">Str ${c.str+c.tempStr}</span>`);
-  if(c.advance)a.push(`<span class="chip good">Advance +${c.advance}</span>`);
-  if(c.sidestep)a.push(`<span class="chip good">Sidestep</span>`);
-  if(c.empower)a.push(`<span class="chip gold">Next attack ×2</span>`);
-  if(c.retain)a.push(`<span class="chip blk">Block kept</span>`);
-  if(c.discount)a.push(`<span class="chip good">Next card −${c.discount} Qi</span>`);
-  if(c.counter)a.push(`<span class="chip gold">Counter</span>`);
-  if(c.burn)a.push(`<span class="chip burn">Burn ${c.burn}</span>`);
-  return a.join('');
+const TRCH={flow:'流',step:'步',break:'斷',still:'靜',mirror:'鏡',reversal:'反'};
+const TRNAME={flow:'Flow',step:'Step',break:'Broken rhythm',still:'Stillness',mirror:'Mirror',reversal:'Reversal'};
+function stIcons(list){return list.map(([g,n,t,cls])=>`<span class="st ${cls}" title="${t}" aria-label="${t}"><span class="zh">${g}</span>${n!=null?`<b>${n}</b>`:''}</span>`).join('')}
+function heroStatus(){const c=G.c,a=[],st=c.str+c.tempStr;
+  if(c.block)a.push(['盾',c.block,`Block ${c.block}`,'blk']);
+  if(st)a.push(['力',st,`Strength ${st}`,'str']);
+  if(c.advance)a.push(['進','+'+c.advance,`Next attack +${c.advance}`,'good']);
+  if(c.sidestep)a.push(['閃',null,'Sidestep: dodge the next hit','good']);
+  if(c.empower)a.push(['倍','×2','Next attack deals double','gold']);
+  if(c.retain)a.push(['守',null,'Block kept into next turn','blk']);
+  if(c.discount)a.push(['減','−'+c.discount,`Next card costs ${c.discount} less`,'good']);
+  if(c.counter)a.push(['反',null,'Counter the next attack','gold']);
+  if(c.burn)a.push(['火',c.burn,`Burn ${c.burn}`,'burn']);
+  return stIcons(a)}
+function foeStatus(f){const a=[];if(f.block)a.push(['盾',f.block,`Block ${f.block}`,'blk']);if(f.str)a.push(['力',f.str,`Strength ${f.str}`,'str']);if(f.burn)a.push(['火',f.burn,`Burn ${f.burn}`,'burn']);return stIcons(a)}
+const BAR_D='M3 6.5 Q30 3.4 60 6 T117 5.6';
+function brushBar(pct,cls){return `<svg class="bbar ${cls||''}" viewBox="0 0 120 12" preserveAspectRatio="none" aria-hidden="true"><path class="bg" d="${BAR_D}" pathLength="100"/><path class="fg" d="${BAR_D}" pathLength="100" style="stroke-dasharray:${Math.max(0,Math.min(100,pct)).toFixed(1)} 100"/></svg>`}
+const lanternSVG=lit=>`<svg class="lant ${lit?'lit':''}" viewBox="0 0 16 25" aria-hidden="true"><path d="M8 0 V3"/><rect x="5" y="3" width="6" height="1.4"/><ellipse class="body" cx="8" cy="11.4" rx="6" ry="6.8"/><path class="rib" d="M8 4.6 V18.2 M2 11.4 H14"/><rect x="5" y="18.2" width="6" height="1.4"/><path class="tas" d="M8 19.8 V24.5"/></svg>`;
+function medallion(c,chg,info){
+  const order=[7,3,5,1,6,2,4,0],G8={7:'☰',3:'☱',5:'☲',1:'☳',6:'☴',2:'☵',4:'☶',0:'☷'},lo=c.stance&7,up=c.stance>>3;
+  const ring=order.map((t,k)=>{const an=(k*45-90)*Math.PI/180,x=50+43*Math.cos(an),y=50+43*Math.sin(an);
+    return `<span class="tri ${t===lo||t===up?'on':''}" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%;transform:translate(-50%,-50%) rotate(${k*45}deg)">${G8[t]}</span>`}).join('');
+  return `<div class="medal ${info?info.cls:''}">${ring}<div class="core">${hexHTML(c.stance,'med',{chg,flip:c.lastMask,tap:UI.shift?'shiftline':null})}</div></div>`;
 }
 function renderCombat(){
   const c=G.c,f=c.foe,m=curMove(),fb=BITS[m.hex],comp=NUM[fb^63];
   const sel=UI.sel!=null?c.hand[UI.sel]:null;
-  let chg=0,tr=null,info=null;
-  let nx=null;
+  let chg=0,tr=null,info=null,nx=null;
   if(sel){const b=BITS[sel.hex];tr=classify(c.stance,b);chg=c.stance^b;info=trInfo(tr,sel);
-    let q=c.qi-effCost(sel,tr);
-    const sd=CARDS[sel.id];
+    let q=c.qi-effCost(sel,tr);const sd=CARDS[sel.id];
     if(tr.type==='flow'){if(lineFx(tr.line,tr.dir).name==='Surge')q++;if(wId()==='hooks'&&!c.hookUsed)q++;q+=sd.fbQi||0}
     if(sel.id==='decrease')q++;
     nx={bits:b,qi:q,disc:tr.type==='flow'&&sel.id==='before'?1:0}}
-  const stanceNum=NUM[c.stance];
-  const qiPips=Array.from({length:Math.max(3,c.qi)},(_,i)=>`<i class="${i<c.qi?'f':''}"></i>`).join('');
-  const balPct=50+c.balance/12*50;
-  const foeChips=[f.block?`<span class="chip blk">Block ${f.block}</span>`:'',f.str?`<span class="chip str">Str ${f.str}</span>`:'',f.burn?`<span class="chip burn">Burn ${f.burn}</span>`:''].join('');
-  const w=WEAPONS[wId()];
+  const stanceNum=NUM[c.stance],balPct=50+c.balance/12*50,w=WEAPONS[wId()];
+  const atk=m.t==='atk'||m.t==='blkatk'||m.t==='burnatk',sv=x=>Math.max(0,Math.round((x+f.str)*balMult()));
+  const bub=atk?`<span class="zh">劍</span><b>${sv(m.v)}${m.hits>1?'×'+m.hits:''}</b>`:m.t==='buff'?`<span class="zh">力</span><b>+${m.s}</b>`:`<span class="zh">盾</span><b>${m.b}</b>`;
 
-  let pv;
-  if(UI.shift)pv=`<div class="hint">Tap one line of your stance to flip it. Costs 1 Qi, once per turn. Shifting counts toward Forms. <button class="btn small" data-act="shift">Cancel</button></div>`;
-  else if(UI.item!=null){
-    const id=G.bag.belt[UI.item].id,it=CONSUM[id];
-    pv=`<div class="pvart" style="display:grid;place-items:center">${itemOrb(it.zh,it.col,'big')}</div><div class="pv"><div class="pv-head"><b>${it.name}</b></div><div class="pv-text">${it.desc}</div>
-      <div class="pv-row"><span class="mute" style="font-size:13px">Consumable · free</span><button class="btn primary" data-act="use" ${c.busy?'disabled':''}>Use</button></div></div>`;
-  }else if(sel){
-    const def=CARDS[sel.id],cost=effCost(sel,tr),can=c.qi>=cost&&!c.busy;
-    const extras=[];
+  let tip;
+  if(UI.shift)tip=`<div class="tip"><div class="tip-h"><b>Shift a line</b><span class="tcost">1 Qi</span></div><div>Tap one line of your stance medallion to flip it. Once per turn; it counts toward Forms.</div><div class="tip-f">Tap Shift again to cancel.</div></div>`;
+  else if(UI.item!=null){const it=CONSUM[G.bag.belt[UI.item].id];
+    tip=`<div class="tip"><div class="tip-h"><b>${it.name}</b><span class="tcost">free</span></div><div>${it.desc}</div><div class="tip-f">Tap it again to use.</div></div>`}
+  else if(sel){
+    const def=CARDS[sel.id],cost=effCost(sel,tr),extras=[];
     if(BITS[sel.hex]===(fb^63)&&!f.interrupted)extras.push(`Opposes ${f.name}'s stance: interrupts, halving their move.`);
     const hist=c.history.slice(-2).concat(sel.hex);
     FORMS.forEach(fm=>{if(hist.length===3&&hist.every((n,i)=>n===fm.seq[i])&&!c.formsTurn.has(fm.id))extras.push(`Completes the Form “${fm.name}”.`)});
     if(sel.id==='dragon'&&c.momentum>=3)extras.push('Momentum 3+: you will lose 3 HP.');
-    pv=`<div class="pvart">${art(sel.id,sel.hex)}</div><div class="pv"><div class="pv-head"><b>${def.name}</b><span class="hx">${hexName(sel.hex)}</span></div>
-      <div class="pv-text">${def.text}</div>${def.flow?`<div class="flowtxt ${tr.type==='flow'?'on':''}"><b>Flow:</b> ${def.flow}${tr.type==='flow'?' <span>(active)</span>':''}</div>`:''}
-      <div class="tr ${info.cls}">${info.label}<span>${info.desc}</span></div>
+    const short=c.qi<cost;
+    tip=`<div class="tip ${info.cls}"><div class="tip-h"><b>${def.name}</b><span class="hx">${hexName(sel.hex)}</span><span class="tcost">${cost} Qi</span></div>
+      <div>${def.text}</div>${def.flow?`<div class="flowtxt ${tr.type==='flow'?'on':''}"><b>Flow:</b> ${def.flow}${tr.type==='flow'?' <span>(active)</span>':''}</div>`:''}
+      <div class="tip-tr"><span class="zh">${TRCH[tr.type]}</span><b>${info.label}</b><span>${info.desc}</span></div>
       ${extras.map(e=>`<div class="extra">${e}</div>`).join('')}
-      <div class="pv-row"><span class="mute" style="font-size:13px">${cost} Qi${cost!==costOf(sel)?` (base ${costOf(sel)})`:''} · leaves ${Math.max(0,nx.qi)} Qi. Other cards show their cost after this one.</span><button class="btn primary" data-act="play" ${can?'':'disabled'}>${c.qi<cost?'Not enough Qi':'Play'}</button></div></div>`;
-  }else pv=`<div class="hint">${c.log||'Tap a technique to see how it moves from your stance.'}</div>`;
+      <div class="tip-f ${short?'no':''}">${short?`Not enough Qi (you have ${c.qi}).`:`Tap the card again to play · leaves ${Math.max(0,nx.qi)} Qi · the other cards show their cost after it`}</div></div>`;
+  }else tip=`<div class="logline">${c.log||'Tap a technique to see how it moves from your stance.'}</div>`;
 
   const pouch=[0,1,2].map(i=>{const id=G.bag.belt[i]&&G.bag.belt[i].id;if(!id)return `<span class="itm empty"></span>`;const it=CONSUM[id];
     return `<button class="itm ${UI.item===i?'sel':''}" style="--ic:${it.col}" data-act="item" data-i="${i}" aria-label="${it.name}"><span class="zh">${it.zh}</span></button>`}).join('');
+  const n=c.hand.length,ov=n>1?`calc((100% - ${n*70+28}px) / ${n-1})`:'0px';
 
   return `${topHTML()}
   <section class="arena" id="arena">
     <div class="bg">${backdrop(G.fight)}</div>${petalLayer()}
     <div class="sprite foe" id="foeSpr">${fighter(LOOKS[f.look],f.weapon)}</div>
-    <div class="info foebox">
-      <div class="nm"><b>${f.name}</b><small>${f.glyph} ${f.school}</small></div>
-      <div class="hpb"><div class="bar"><b style="width:${f.hp/f.max*100}%"></b></div><span>${f.hp}/${f.max}</span></div>
-      ${foeChips?`<div class="chips">${foeChips}</div>`:''}
-      <div class="intent ${f.interrupted?'cut':''}"><span class="k">Next</span><span class="w">${intentIcon(m)} ${intentText(m,f)}</span>${f.interrupted?'<span class="chip good">Interrupted</span>':''}</div>
-      <div class="fst" title="Stance ${he(m.hex)}">${hexHTML(fb,'sm')}<span class="zh">${hz(m.hex)}</span><span>· interrupt:</span><b><span class="zh">${hz(comp)}</span> ${he(comp)}</b></div>
-    </div>
     <div class="sprite hero" id="heroSpr">${fighter(LOOKS.hero,wId())}</div>
-    <div class="info herobox">
-      <div class="nm"><b>The Wanderer</b><small>${w?w.zh+' '+w.name:'拳 Bare hands'}</small></div>
-      <div class="hpb"><div class="bar me"><b style="width:${G.hp/maxHp()*100}%"></b></div><span>${G.hp}/${maxHp()}</span></div>
-      <div class="chips">${statusChips()}</div>
+    <div class="plate foe">
+      <div class="nm"><b>${f.name}</b><small>${f.glyph} ${f.school}</small></div>
+      <div class="hpb">${brushBar(f.hp/f.max*100)}<span>${f.hp}/${f.max}</span></div>
+      <div class="sts">${foeStatus(f)}</div>
+    </div>
+    <div class="intentbub ${f.interrupted?'cut':''}" title="Next: ${intentText(m,f)}${f.interrupted?' (interrupted, halved)':''}. Stance ${hz(m.hex)} ${he(m.hex)}; its opposite ${hz(comp)} ${he(comp)} interrupts." aria-label="Enemy's next move: ${intentText(m,f)}">${bub}</div>
+    <div class="plate hero">
+      <div class="nm"><small>${w?w.zh+' '+w.name:'拳 Bare hands'}</small><b>The Wanderer</b></div>
+      <div class="hpb">${brushBar(G.hp/maxHp()*100,'me')}<span>${G.hp}/${maxHp()}</span></div>
+      <div class="sts">${heroStatus()}</div>
     </div>
   </section>
-  <section class="stance">
+  <section class="stance2">
     <div class="side">
-      <div class="qi" aria-label="${c.qi} Qi">${qiPips}</div>
-      <div class="mom" aria-label="Momentum ${c.momentum}"><span class="zh">勢</span> <b>${c.momentum}</b></div><span class="stat-label">Momentum</span>
+      <div class="stat-label">Qi</div><div class="lants" aria-label="${c.qi} Qi">${Array.from({length:Math.max(3,c.qi)},(_,i)=>lanternSVG(i<c.qi)).join('')}</div>
+      <div class="mom2" aria-label="Momentum ${c.momentum}"><span class="zh">勢</span><b>${c.momentum}</b></div><span class="stat-label">Momentum</span>
     </div>
-    <div class="mid ${info?info.cls:''}">
-      ${hexHTML(c.stance,'big',{chg,flip:c.lastMask,tap:UI.shift?'shiftline':null})}
-      <div class="name"><span class="stat-label">Stance</span><br><span class="zh">${hz(stanceNum)}</span><small>${stanceNum} · ${he(stanceNum)}</small></div>
-    </div>
+    <div>${medallion(c,chg,info)}<div class="sname"><span class="zh">${hz(stanceNum)}</span><small>${stanceNum} · ${he(stanceNum)}</small></div></div>
     <div class="side r">
-      <div style="width:100%"><div class="stat-label">Yin · Yang <span class="balval ${c.balance>0?'yang':c.balance<0?'yin':''}">${c.balance===0?'even':(c.balance>0?'+':'−')+Math.abs(c.balance)*4+'% dealt & taken'}</span></div>
+      <div style="width:100%"><div class="stat-label">Yin · Yang</div><div class="balval ${c.balance>0?'yang':c.balance<0?'yin':''}" style="font-size:12px">${c.balance===0?'even':(c.balance>0?'+':'−')+Math.abs(c.balance)*4+'% dealt/taken'}</div>
         <div class="balance"><span class="zh">陰</span><div class="track"><span class="mark" style="left:${balPct}%"></span></div><span class="zh">陽</span></div></div>
       <span class="piles">Draw ${c.draw.length} · Discard ${c.discard.length}</span>
     </div>
   </section>
-  <section class="preview" aria-live="polite">${pv}</section>
-  <section class="hand ${nx?'withnext':''}">${c.hand.map((h,i)=>{
-      const t=classify(c.stance,BITS[h.hex]),ti=trInfo(t,h),ec=effCost(h,t),base=costOf(h);
+  <section aria-live="polite">${tip}</section>
+  <section class="fan ${nx?'withnext':''}" style="--ov:${ov}">${c.hand.map((h,i)=>{
+      const t=classify(c.stance,BITS[h.hex]),ti=trInfo(t,h),ec=effCost(h,t),base=costOf(h),off=i-(n-1)/2;
       let nxt='';
       if(nx&&i!==UI.sel){const t2=classify(nx.bits,BITS[h.hex]),ti2=trInfo(t2,h),ec2=effCost(h,t2,nx.disc);
-        nxt=`<span class="next ${ti2.cls} ${ec2>nx.qi?'no':''}" title="If played after ${CARDS[sel.id].name}">then ${ec2} · ${ti2.short}</span>`}
-      return `<button class="card ${ti.cls} ${UI.sel===i?'sel':''} ${c.qi<ec?'na':''} ${h.temp?'temp':''} ${h.sig?'sig':''}" data-act="sel" data-i="${i}">
-        <span class="cost ${ec<base?'down':ec>base?'up':''}">${ec}</span><span class="badge">${ti.short}</span>
+        nxt=`<span class="next ${ti2.cls} ${ec2>nx.qi?'no':''}" title="If played after ${CARDS[sel.id].name}: ${ec2} Qi, ${TRNAME[t2.type]}">→${ec2} <span class="zh">${TRCH[t2.type]}</span></span>`}
+      return `<button class="card ${ti.cls} ${UI.sel===i?'sel':''} ${c.qi<ec?'na':''} ${h.temp?'temp':''} ${h.sig?'sig':''}" style="--r:${(off*3).toFixed(1)}deg;--y:${(off*off*1.6).toFixed(1)}px" data-act="sel" data-i="${i}" aria-label="${CARDS[h.id].name}, ${ec} Qi, ${TRNAME[t.type]}">
+        <span class="cost ${ec<base?'down':ec>base?'up':''}">${ec}</span><span class="badge"><span class="zh">${TRCH[t.type]}</span>${ti.short}</span>
         ${art(h.id,h.hex)}<span class="nm">${CARDS[h.id].name}</span><span class="hn">${hexHTML(BITS[h.hex],'xs')}<span class="zh">${hz(h.hex)}</span>${h.hex}</span>${nxt}</button>`}).join('')||'<div class="mute" style="padding:20px">Your hands are empty.</div>'}</section>
   <div class="actions">
     <button class="btn ${UI.shift?'on':''}" data-act="shift" ${c.shiftUsed||c.qi<1||c.busy?'disabled':''}>Shift · 1 Qi</button>
-    <div class="pouch" aria-label="Pouch">${pouch}</div>
+    <div class="pouch" aria-label="Belt">${pouch}</div>
     <button class="btn primary" data-act="end" ${c.busy?'disabled':''}>End turn</button>
   </div>`;
 }
@@ -1396,6 +1522,11 @@ function renderModal(){
     <tr><td>1–2 Earth</td><td>Advance: next attack +3</td><td>Sidestep: dodge next hit</td></tr>
     <tr><td>3–4 Human</td><td>Rooted Strength: +1 this turn</td><td>Yielding Guard: +4 Block</td></tr>
     <tr><td>5–6 Heaven</td><td>Surge: +1 Qi</td><td>Insight: draw 1</td></tr></table></div>
+    <h4>Status marks</h4><div class="tbl"><table><tr><th>Mark</th><th>Meaning</th></tr>
+    <tr><td class="zh">盾</td><td>Block</td></tr><tr><td class="zh">力</td><td>Strength</td></tr><tr><td class="zh">進</td><td>Next attack bonus (Advance)</td></tr>
+    <tr><td class="zh">閃</td><td>Sidestep the next hit</td></tr><tr><td class="zh">倍</td><td>Next attack deals double</td></tr><tr><td class="zh">守</td><td>Block kept into next turn</td></tr>
+    <tr><td class="zh">減</td><td>Next card costs less</td></tr><tr><td class="zh">反</td><td>Counter the next attack</td></tr><tr><td class="zh">火</td><td>Burn</td></tr>
+    <tr><td class="zh">劍</td><td>Enemy's next attack (bubble above them)</td></tr></table></div>
     <h4>Also</h4><ul class="rules">
     <li>Each attack deals +1 damage per point of Momentum.</li>
     <li><b>Interrupt:</b> play the exact opposite of your foe's stance to halve their next move.</li>
@@ -1433,7 +1564,7 @@ document.addEventListener('click',e=>{
     case 'go':return newGame(UI.arm);
     case 'sel':{const k=+i;if(G.c.busy)return;UI.shift=false;UI.item=null;if(UI.sel===k)return play(k);UI.sel=k;return render()}
     case 'play':if(UI.sel!=null)play(UI.sel);return;
-    case 'item':{const k=+i;UI.sel=null;UI.shift=false;const o=G.bag.belt[k];if(!o)return;const id=o.id;if(!CONSUM[id].combat&&id!=='balm')return;UI.item=UI.item===k?null:k;return render()}
+    case 'item':{const k=+i;UI.sel=null;UI.shift=false;const o=G.bag.belt[k];if(!o)return;const id=o.id;if(!CONSUM[id].combat&&id!=='balm')return;if(UI.item===k)return useItem('belt:'+k);UI.item=k;return render()}
     case 'use':if(UI.item!=null)useItem('belt:'+UI.item);return;
     case 'end':return endTurn();
     case 'shift':UI.shift=!UI.shift;UI.sel=null;UI.item=null;return render();
