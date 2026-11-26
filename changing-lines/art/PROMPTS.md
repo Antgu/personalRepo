@@ -136,3 +136,7 @@ The Bag shows a full-length portrait of the hero. Save it as `changing-lines/art
 
 - Size: 900×1320 px (ratio 300:440), full body, standing, feet near the bottom edge; the figure fills about two thirds of the height.
 - Prompt: *Chinese fantasy (guofeng) digital painting, full-length portrait of a young swordswoman, the Wanderer, long black hair loose in the wind with a thin red ribbon, calm pale face, a long open black outer robe over a white inner robe with red ties and a red sash, leather belt with a short sword, a straight sword in a dark scabbard worn on her back with the hilt over her shoulder, one hand raised to the scabbard strap; pale grey-white background with a single vertical grey band behind her, tall silver pampas grass and reeds swaying around her, small brown sparrows perched and in flight; soft muted palette with red accents, fine linework, painterly, airy, high detail, no text, no border, no watermark.*
+
+## Weapon-specific hero sprites
+
+The duel sprite can differ per weapon. Use the key `fighter:hero:<weapon>` (weapon is `jian`, `dao`, `spear`, `fan`, `staff`, `hooks` or `fists`), e.g. `"fighter:hero:jian": "art/fighters/hero_jian.webp"`. A plain `fighter:hero` entry is used for any weapon without its own sprite; with neither, the drawn figure is shown. Generate on plain white; Claude can cut out the background and frame the figure so the feet land on the arena platform.
