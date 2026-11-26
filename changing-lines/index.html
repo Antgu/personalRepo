@@ -125,8 +125,9 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--gold);outl
 .stat-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
 .balance{display:flex;align-items:center;gap:5px;width:100%}
 .balance .zh{font-size:15px}
-.balance .track{flex:1;min-width:40px;height:7px;border-radius:4px;position:relative;background:linear-gradient(90deg,var(--cin) 0 12%,var(--panel2) 12% 88%,var(--cin) 88%)}
-.balance .track::after{content:"";position:absolute;left:41%;width:18%;top:0;bottom:0;background:color-mix(in srgb,var(--jade) 40%,transparent)}
+.balance .track{flex:1;min-width:40px;height:7px;border-radius:4px;position:relative;background:linear-gradient(90deg,var(--azure),var(--panel2) 50%,var(--cin))}
+.balval{letter-spacing:0;text-transform:none;font-weight:600}.balval.yang{color:var(--cin)}.balval.yin{color:var(--azure)}
+.balance .track::after{content:"";position:absolute;left:50%;width:1px;top:-2px;bottom:-2px;background:var(--mute)}
 .balance .mark{position:absolute;top:-4px;width:4px;height:15px;background:var(--fg);border-radius:2px;transform:translateX(-50%);transition:left .3s;z-index:1}
 .piles{font-size:12px;color:var(--mute)}
 
@@ -637,7 +638,7 @@ const CHARMS={
   jade:{name:'Jade Pendant',zh:'玉',desc:'+10 maximum health.',col:'#5fb79a',price:55},
   bagua:{name:'Bagua Mirror',zh:'鏡',desc:'Mirror transitions also draw 1 card.',col:'#7097dc',price:55},
   lantern:{name:'Crimson Lantern',zh:'燈',desc:'Foes start each duel with 4 Burn.',col:'#e7863a',price:60},
-  shell:{name:'Tortoise Shell',zh:'龜',desc:'Harmony gives +7 Block instead of +3.',col:'#a7b4a0',price:50},
+  shell:{name:'Tortoise Shell',zh:'龜',desc:'While you lean Yin, start each turn with 5 Block.',col:'#a7b4a0',price:50},
 };
 const CONSUM={
   qipill:{name:'Qi Pill',zh:'丹',desc:'Gain 2 Qi.',col:'#cfa64a',price:22,combat:true},
@@ -697,8 +698,7 @@ function startTurn(){
   const c=G.c;c.turn++;if(c.retain){c.retain=false}else c.block=0;c.discount=0;c.tempStr=0;c.counter=false;c.sidestep=false;c.hookUsed=false;c.formsTurn=new Set();
   const notes=[];
   if(c.burn>0){selfHurt(c.burn,'Burn');c.burn--}
-  if(Math.abs(c.balance)>=9){selfHurt(3);c.tempStr+=2;notes.push('Qi Deviation: −3 HP, +2 Strength this turn');fl('me','Qi Deviation','dmg')}
-  else if(c.turn>1&&Math.abs(c.balance)<=2){const v=cId()==='shell'?7:3;c.block+=v;notes.push(`Harmony: +${v} Block`);fl('me',`Harmony +${v}`,'blk')}
+  if(cId()==='shell'&&c.balance<0){c.block+=5;notes.push('Tortoise Shell: +5 Block');fl('me','+5 Block','blk')}
   c.balance=c.balance>0?Math.max(0,c.balance-2):Math.min(0,c.balance+2);
   c.qi=3;c.shiftUsed=false;c.foe.interrupted=false;
   draw(wId()==='fists'?6:5);
@@ -714,7 +714,7 @@ function A(x,base,hits=1,pierce=false){
   for(let i=0;i<hits;i++){
     let d=base+c.str+c.tempStr+c.momentum;
     if(c.advance){d+=c.advance;c.advance=0}
-    d=Math.max(0,Math.floor(d*x.mult*(x.emp?2:1)));
+    d=Math.max(0,Math.round(d*x.mult*(x.emp?2:1)*balMult()));
     hitFoe(d,pierce);
     if(c.foe.hp<=0)break;
   }
@@ -734,8 +734,10 @@ function hitFoe(d,pierce,tag){
   f.hp=Math.max(0,f.hp-d);fl('foe',(tag?tag+' ':'')+'−'+d,'dmg big');G.c.anim.push('foeHit');
 }
 function selfHurt(d,tag){G.hp=Math.max(0,G.hp-d);fl('me',(tag?tag+' ':'')+'−'+d,'dmg');if(G.c)G.c.anim.push('heroHit')}
+// Yin-Yang: each point toward yang adds 4% to damage dealt AND taken; toward yin removes it from both
+const balMult=()=>G&&G.c?1+0.04*G.c.balance:1;
 function hurtMe(d){
-  const c=G.c;
+  const c=G.c;d=Math.max(0,Math.round(d*balMult()));
   if(c.counter){c.counter=false;fl('me','Countered!','gold');hitFoe(d*(wId()==='fan'?2:1),true,'Reflected');return}
   if(c.sidestep){c.sidestep=false;fl('me','Sidestep','good');return}
   if(c.block){const a=Math.min(c.block,d);c.block-=a;d-=a}
@@ -751,6 +753,7 @@ function play(idx){
   if(c.qi<cost)return;
   c.qi-=cost;c.discount=0;c.hand.splice(idx,1);UI.sel=null;
   const x={mult:1,tr,inst,momBefore:c.momentum};
+  c.balance=Math.max(-12,Math.min(12,c.balance+pop(bits)-3));
   const msgs=[`${def.name}: ${trInfo(tr,inst).short.toLowerCase()}`];
   const wp=wId();
   if(tr.type==='flow'){
@@ -759,7 +762,7 @@ function play(idx){
     else if(fx.name==='Rooted Strength')c.tempStr++;else if(fx.name==='Yielding Guard'){c.block+=4;fl('me','+4 Block','blk')}
     else if(fx.name==='Surge')c.qi++;else draw(1);
     const reg=REGION(tr.line);
-    if(wp==='jian'&&reg==='Heaven'){hitFoe(3,false,'Sword');msgs.push('sword +3')}
+    if(wp==='jian'&&reg==='Heaven'){hitFoe(Math.round(3*balMult()),false,'Sword');msgs.push('sword +3')}
     if(wp==='staff'&&reg==='Earth'){c.block+=3;fl('me','+3 Block','blk')}
     if(wp==='hooks'&&!c.hookUsed){c.hookUsed=true;c.qi++;msgs.push('hooks +1 Qi')}
   }else if(tr.type==='break')c.momentum=0;
@@ -770,7 +773,6 @@ function play(idx){
   if(bits===(fb^63)&&!c.foe.interrupted){c.foe.interrupted=true;msgs.push('Interrupt!');fl('foe','Interrupted','good')}
   def.play(x);
   if(tr.type==='flow'&&def.fb){def.fb(x);msgs.push('Flow bonus: '+def.flow)}
-  c.balance=Math.max(-12,Math.min(12,c.balance+pop(bits)-3));
   c.lastMask=c.stance^bits;c.stance=bits;c.history.push(inst.hex);
   checkForms(msgs);
   (def.exhaust||inst.temp?c.exhaust:c.discard).push(inst);
@@ -831,7 +833,7 @@ function foeTurn(){
   setTimeout(()=>{c.busy=false;startTurn()},650);
 }
 function intentText(m,f){
-  const s=f?f.str:0,v=x=>Math.max(0,x+s);
+  const s=f?f.str:0,v=x=>Math.max(0,Math.round((x+s)*balMult()));
   switch(m.t){
     case 'atk':return m.hits>1?`Attack ${v(m.v)}×${m.hits}`:`Attack ${v(m.v)}`;
     case 'blkatk':return `Block ${m.b} · Attack ${v(m.v)}`;
@@ -1090,7 +1092,7 @@ function renderCombat(){
       <div class="name"><span class="stat-label">Stance</span><br><span class="zh">${hz(stanceNum)}</span><small>${stanceNum} · ${he(stanceNum)}</small></div>
     </div>
     <div class="side r">
-      <div style="width:100%"><div class="stat-label">Yin · Yang</div>
+      <div style="width:100%"><div class="stat-label">Yin · Yang <span class="balval ${c.balance>0?'yang':c.balance<0?'yin':''}">${c.balance===0?'even':(c.balance>0?'+':'−')+Math.abs(c.balance)*4+'% dealt & taken'}</span></div>
         <div class="balance"><span class="zh">陰</span><div class="track"><span class="mark" style="left:${balPct}%"></span></div><span class="zh">陽</span></div></div>
       <span class="piles">Draw ${c.draw.length} · Discard ${c.discard.length}</span>
     </div>
@@ -1398,7 +1400,7 @@ function renderModal(){
     <li>Each attack deals +1 damage per point of Momentum.</li>
     <li><b>Interrupt:</b> play the exact opposite of your foe's stance to halve their next move.</li>
     <li><b>Shift:</b> once per turn, pay 1 Qi to flip one line of your stance without playing a card.</li>
-    <li><b>Yin · Yang:</b> start a turn near the centre for Harmony (+3 Block). At either red end you suffer Qi Deviation (−3 HP, +2 Strength).</li>
+    <li><b>Yin · Yang:</b> every card moves the meter by its yang lines minus 3 (a hexagram with 5 yang lines moves it +2, one with none −3), before it strikes. Each point toward yang makes you deal <i>and</i> take 4% more damage; each point toward yin, 4% less of both (from −48% to +48%). The meter drifts 2 points back toward the centre each turn. Enemy attack numbers already include it.</li>
     <li><b>Weapons</b> change one rule and add two techniques while equipped. <b>Talismans</b> are passive. <b>Pouch</b> items are free to use.</li>
     <li><b>Forms:</b> pass through the three hexagrams of a Form in order (cards or shifts) for a free Form technique. Performing one in a duel masters it.</li></ul>`;
   else if(UI.modal==='manual')body=`<h3>Manual of Forms</h3><p class="mute">Pass through these stances in order. Every duel starts in 坤 The Receptive.</p>
