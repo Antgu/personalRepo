@@ -1,0 +1,35 @@
+CHANGING LINES: HERO ART PROMPTS (paste one prompt at a time into Gemini)
+
+==================================================================
+1) INVENTORY PORTRAIT  ->  save as art/fighters/hero_portrait.webp
+   manifest line: "portrait:hero": "art/fighters/hero_portrait.webp"
+==================================================================
+
+Create a tall vertical image, portrait orientation, aspect ratio 2:3 (for example 900 x 1320 pixels).
+
+Chinese fantasy (guofeng) digital painting, full-length portrait of a young swordswoman called the Wanderer. Long black hair loose and blowing in the wind with a thin red ribbon, calm pale face. A long open black outer robe over a white inner robe, with red ties and a red sash, a leather belt with a short sword. A straight sword in a dark scabbard worn on her back with the hilt over her shoulder, one hand raised to the scabbard strap. She stands upright and faces the viewer, full body visible, feet near the bottom edge, the figure filling about two thirds of the height.
+
+Background: pale grey-white with a single vertical grey band behind her, tall silver pampas grass and reeds swaying around her, small brown sparrows perched and in flight.
+
+Soft muted palette with red accents, fine linework, painterly, airy, high detail. No text, no seal, no border, no watermark.
+
+
+==================================================================
+2) BATTLE SPRITE  ->  save as art/fighters/hero.png (transparent)
+   manifest line: "fighter:hero": "art/fighters/hero.png"
+==================================================================
+
+Create a vertical image, aspect ratio 3:4 (for example 600 x 800 pixels), on a plain pure white background.
+
+The Wanderer, a young swordswoman in dark ink robes with a crimson sash and long crimson silk ribbons, high ponytail tied with a red ribbon, poised in a wide martial stance holding a straight sword forward. Full body, side view facing RIGHT, feet near the bottom edge. A clean, readable silhouette: keep the ink mist and splatter inside the figure, nothing touching the edges, no ground, no scenery.
+
+Style: Chinese ink-wash (shuimo, xieyi) painting on pale rice paper. Mostly black and grey ink in loose wet and dry-brush strokes; wind-swept hair and cloth; colour used sparingly as spot accents (vermilion only), never a full-colour painting; sparse, expressive, high contrast. No text, no seal, no border, no watermark.
+
+After generating: remove the white background (any background-remover works) and save as a transparent PNG.
+
+
+------------------------------------------------------------------
+Tips for Gemini
+- If the first result is close, reply with one change at a time, e.g. "same image, but make the sword hilt visible over her left shoulder".
+- Gemini sometimes ignores the aspect ratio: add "tall vertical portrait format" or crop afterwards.
+- Download the full-size image, then upload it to the repo as described in art/PROMPTS.md ("Where to put the files on GitHub").
