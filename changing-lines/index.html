@@ -208,7 +208,7 @@ button.bigcard:hover{border-color:var(--gold)}
 .rules li{font-size:15px}
 .note{background:var(--panel);border-left:3px solid var(--gold);padding:8px 12px;border-radius:4px;font-size:15px}
 .choice{display:grid;gap:10px}
-.choice .btn{text-align:left;text-transform:none;font-size:17px;padding:14px;letter-spacing:0}
+.choice .btn{white-space:normal;text-align:left;text-transform:none;font-size:17px;padding:14px;letter-spacing:0}
 .choice .btn small{display:block;font-weight:400;color:var(--mute);font-size:14px}
 .cultbox{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
 .cultbox .info2{flex:1;min-width:180px;display:flex;flex-direction:column;gap:6px}
@@ -244,6 +244,34 @@ th{color:var(--mute);font-weight:600;text-transform:uppercase;font-size:12px;let
 .form .step .zh{font-size:16px}
 .form.done{outline:1px solid var(--gold)}
 .bagtop{display:flex;gap:12px;align-items:center}
+.chest{background:linear-gradient(#2e2622,#221c19);border:2px solid #7a5c32;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:10px;box-shadow:inset 0 0 0 1px #000,0 6px 18px #3a332a40;color:#cdbf9f}
+.doll{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:8px;align-items:center}
+.dollfig svg{width:100%;display:block;overflow:visible}
+.dollside{display:flex;flex-direction:column;gap:8px;align-items:center;font-size:13px}
+.dollside .gold{color:#e1c27a}
+.slot{background:#1a1512;border:1px solid #5c4630;border-radius:4px;display:grid;place-items:center;color:#8f8068;font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:4px;position:relative}
+.slot svg{width:100%;height:100%;display:block}
+.slot.wslot{aspect-ratio:1/2;width:100%}
+.slot.cslot{aspect-ratio:1;width:64%}
+.slot.bslot{aspect-ratio:1}
+.slot.can{border-color:#6fbf9a;box-shadow:0 0 0 1px #6fbf9a,inset 0 0 12px #6fbf9a44}
+.slot.locked{opacity:.6}
+.slot.held,.gitem.held{outline:2px solid #e7c873;outline-offset:1px;box-shadow:0 0 12px #e7c87388}
+.beltrow{display:flex;gap:10px;align-items:center;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8f8068}
+.belt{flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,44px));gap:6px}
+.igrid{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));grid-auto-rows:auto;gap:2px}
+.icell{aspect-ratio:1;background:#191411;border:1px solid #3a2f25;border-radius:2px;padding:0;min-width:0}
+.icell.ok{background:#2c4a3a;border-color:#6fbf9a}.icell.bad{background:#5a2a24;border-color:#c46a5a}
+.gitem{z-index:1;background:radial-gradient(circle at 50% 40%,#3d332b,#261f1b);border:1px solid #7a5c32;border-radius:3px;padding:2px;display:grid;place-items:center;min-width:0}
+.gitem svg{width:100%;height:100%;display:block}
+.igrid.holding .gitem:not(.held){pointer-events:none}
+.igrid.holding .gitem.held{pointer-events:none;opacity:.55}
+.iinfo{background:var(--panel2);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px;font-size:14px;min-height:64px}
+.iinfo p{margin:0}
+.iinfo-h{display:flex;gap:10px;align-items:center}
+.iinfo-h .zh{font-size:26px;color:var(--gold)}
+.iinfo-h b{display:block;font-size:17px}
+.iinfo-h small{color:var(--mute)}
 .tabs{display:flex;gap:6px}
 .tabs .btn{flex:1}
 .mapstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:6px}
@@ -516,12 +544,12 @@ function classify(a,b){
 }
 const REGION=l=>l<2?'Earth':l<4?'Human':'Heaven';
 function lineFx(line,dir){
-  const r=REGION(line),adv=G&&G.bag.weapon==='spear'?5:3;
+  const r=REGION(line),adv=G&&wId()==='spear'?5:3;
   if(r==='Earth')return dir==='hard'?{name:'Advance',desc:`next attack +${adv}`}:{name:'Sidestep',desc:'dodge the next hit'};
   if(r==='Human')return dir==='hard'?{name:'Rooted Strength',desc:'+1 Strength this turn'}:{name:'Yielding Guard',desc:'+4 Block'};
   return dir==='hard'?{name:'Surge',desc:'+1 Qi'}:{name:'Insight',desc:'draw 1'};
 }
-function revMult(card){const k=card&&CARDS[card.id].revBonus?2:1;return 1+G.c.momentum*k+(G.bag.weapon==='dao'?1:0)}
+function revMult(card){const k=card&&CARDS[card.id].revBonus?2:1;return 1+G.c.momentum*k+(wId()==='dao'?1:0)}
 function trInfo(tr,card){
   const mom=G.c?G.c.momentum:0;
   switch(tr.type){
@@ -622,25 +650,26 @@ const $app=document.getElementById('app'),$modal=document.getElementById('modal'
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 let floats=[];
 function fl(target,text,cls=''){floats.push({target,text,cls})}
-const maxHp=()=>G.baseMax+(G.bag.charm==='jade'?10:0);
+const wId=()=>G.bag.eqW?G.bag.eqW.id:'fists',cId=()=>G.bag.eqC?G.bag.eqC.id:null;
+const maxHp=()=>G.baseMax+(cId()==='jade'?10:0);
 
 function newGame(weapon){
   G={screen:'combat',hp:64,baseMax:64,deck:[],fight:0,mastered:new Set(),uid:0,notes:[],reward:null,taels:20,shop:[],
-     bag:{weapons:[weapon],weapon,charms:[],charm:null,items:['balm','qipill']}};
+     bag:{grid:[],eqW:{uid:'i0',kind:'weapon',id:weapon},eqC:null,belt:[{uid:'i1',kind:'item',id:'balm'},{uid:'i2',kind:'item',id:'qipill'},null]}};
   STARTER.forEach(id=>addCard(id));
   startCombat();
 }
 function addCard(id,extra={}){G.deck.push(Object.assign({uid:++G.uid,id,hex:CARDS[id].hex},extra))}
 const costOf=inst=>inst.cost!=null?inst.cost:CARDS[inst.id].cost;
 function combatDeck(){
-  const d=G.deck.map(x=>({...x})),w=WEAPONS[G.bag.weapon];
+  const d=G.deck.map(x=>({...x})),w=WEAPONS[wId()];
   if(w){for(let k=0;k<2;k++)d.push({uid:'w'+k,id:w.sig,hex:CARDS[w.sig].hex,sig:true})}
   return d;
 }
 function startCombat(){
   const f=FOES[G.fight];
   G.c={draw:shuffle(combatDeck()),hand:[],discard:[],exhaust:[],qi:3,stance:BITS[2],momentum:0,balance:0,block:0,str:0,tempStr:0,advance:0,empower:false,retain:false,discount:0,sidestep:false,counter:false,burn:0,shiftUsed:false,hookUsed:false,history:[2],formsTurn:new Set(),formsDone:new Set(),log:'You take the Receptive stance and bow. The duel begins.',lastMask:0,busy:false,turn:0,anim:[],
-    foe:{...f,hp:f.hp,max:f.hp,block:0,str:0,burn:G.bag.charm==='lantern'?4:0,mi:0,interrupted:false}};
+    foe:{...f,hp:f.hp,max:f.hp,block:0,str:0,burn:cId()==='lantern'?4:0,mi:0,interrupted:false}};
   G.screen='combat';UI.sel=null;UI.item=null;UI.shift=false;UI.modal=null;
   startTurn();
 }
@@ -658,10 +687,10 @@ function startTurn(){
   const notes=[];
   if(c.burn>0){selfHurt(c.burn,'Burn');c.burn--}
   if(Math.abs(c.balance)>=9){selfHurt(3);c.tempStr+=2;notes.push('Qi Deviation: −3 HP, +2 Strength this turn');fl('me','Qi Deviation','dmg')}
-  else if(c.turn>1&&Math.abs(c.balance)<=2){const v=G.bag.charm==='shell'?7:3;c.block+=v;notes.push(`Harmony: +${v} Block`);fl('me',`Harmony +${v}`,'blk')}
+  else if(c.turn>1&&Math.abs(c.balance)<=2){const v=cId()==='shell'?7:3;c.block+=v;notes.push(`Harmony: +${v} Block`);fl('me',`Harmony +${v}`,'blk')}
   c.balance=c.balance>0?Math.max(0,c.balance-2):Math.min(0,c.balance+2);
   c.qi=3;c.shiftUsed=false;c.foe.interrupted=false;
-  draw(G.bag.weapon==='fists'?6:5);
+  draw(wId()==='fists'?6:5);
   if(notes.length)c.log=notes.join(' · ');
   render();
   if(G.hp<=0)return lose();
@@ -696,7 +725,7 @@ function hitFoe(d,pierce,tag){
 function selfHurt(d,tag){G.hp=Math.max(0,G.hp-d);fl('me',(tag?tag+' ':'')+'−'+d,'dmg');if(G.c)G.c.anim.push('heroHit')}
 function hurtMe(d){
   const c=G.c;
-  if(c.counter){c.counter=false;fl('me','Countered!','gold');hitFoe(d*(G.bag.weapon==='fan'?2:1),true,'Reflected');return}
+  if(c.counter){c.counter=false;fl('me','Countered!','gold');hitFoe(d*(wId()==='fan'?2:1),true,'Reflected');return}
   if(c.sidestep){c.sidestep=false;fl('me','Sidestep','good');return}
   if(c.block){const a=Math.min(c.block,d);c.block-=a;d-=a}
   if(d>0)selfHurt(d);else fl('me','Blocked','blk');
@@ -712,7 +741,7 @@ function play(idx){
   c.qi-=cost;c.discount=0;c.hand.splice(idx,1);UI.sel=null;
   const x={mult:1,tr,inst,momBefore:c.momentum};
   const msgs=[`${def.name}: ${trInfo(tr,inst).short.toLowerCase()}`];
-  const wp=G.bag.weapon;
+  const wp=wId();
   if(tr.type==='flow'){
     c.momentum++;const fx=lineFx(tr.line,tr.dir);msgs.push(fx.name);
     if(fx.name==='Advance')c.advance+=wp==='spear'?5:3;else if(fx.name==='Sidestep')c.sidestep=true;
@@ -724,8 +753,8 @@ function play(idx){
     if(wp==='hooks'&&!c.hookUsed){c.hookUsed=true;c.qi++;msgs.push('hooks +1 Qi')}
   }else if(tr.type==='break')c.momentum=0;
   else if(tr.type==='still')x.mult=1.5;
-  else if(tr.type==='mirror'){c.counter=true;msgs.push('counter ready');if(G.bag.charm==='bagua')draw(1)}
-  else if(tr.type==='reversal'){x.mult=revMult(inst);msgs.push('×'+x.mult);if(x.mult>1)fl('me','×'+x.mult,'gold big');c.momentum=0;if(tr.mirror){c.counter=true;if(G.bag.charm==='bagua')draw(1)}}
+  else if(tr.type==='mirror'){c.counter=true;msgs.push('counter ready');if(cId()==='bagua')draw(1)}
+  else if(tr.type==='reversal'){x.mult=revMult(inst);msgs.push('×'+x.mult);if(x.mult>1)fl('me','×'+x.mult,'gold big');c.momentum=0;if(tr.mirror){c.counter=true;if(cId()==='bagua')draw(1)}}
   const fb=BITS[curMove().hex];
   if(bits===(fb^63)&&!c.foe.interrupted){c.foe.interrupted=true;msgs.push('Interrupt!');fl('foe','Interrupted','good')}
   def.play(x);
@@ -756,10 +785,11 @@ function checkForms(msgs){
     }
   }
 }
-function useItem(idx){
-  const id=G.bag.items[idx],it=CONSUM[id],c=G.c,inCombat=G.screen==='combat';
+function useItem(src){
+  const o=invGet(src);if(!o||o.kind!=='item')return;
+  const id=o.id,it=CONSUM[id],c=G.c,inCombat=G.screen==='combat';
   if(!it||(it.combat&&!inCombat)||(inCombat&&c.busy))return;
-  G.bag.items.splice(idx,1);UI.item=null;
+  invRemove(src);UI.item=null;UI.held=null;
   if(id==='balm'){G.hp=Math.min(maxHp(),G.hp+14);if(inCombat)fl('me','+14 HP','good')}
   if(id==='qipill'){c.qi+=2;fl('me','+2 Qi','gold')}
   if(id==='talisman'){c.anim.push('heroLunge');hitFoe(10,true,'Talisman')}
@@ -806,11 +836,12 @@ function checkEnd(){
   else if(G.hp<=0)lose();
 }
 function grant(kind,id){
-  const b=G.bag;
-  if(kind==='weapon'&&!b.weapons.includes(id)){b.weapons.push(id);return `Weapon: ${WEAPONS[id].name}`}
-  if(kind==='charm'&&!b.charms.includes(id)){b.charms.push(id);return `Talisman: ${CHARMS[id].name}`}
-  if(kind==='item'){if(b.items.length<3){b.items.push(id);return `Pouch: ${CONSUM[id].name}`}G.taels+=10;return `Pouch full: ${CONSUM[id].name} sold for 10 taels`}
-  return null;
+  const b=G.bag,o={uid:'i'+(++G.uid),kind,id},nm=itemDef(o).name;
+  if(kind!=='item'&&owns(kind,id))return null;
+  if(kind==='item'){const k=b.belt.indexOf(null);if(k>=0){b.belt[k]=o;return `Belt: ${nm}`}}
+  const sp=findSpot(o);
+  if(sp){b.grid.push({...o,x:sp[0],y:sp[1]});return `${kind==='weapon'?'Weapon':kind==='charm'?'Talisman':'Item'}: ${nm} (in your bag)`}
+  const v=kind==='item'?10:25;G.taels+=v;return `No room in your bag: ${nm} sold for ${v} taels`;
 }
 function win(){
   const c=G.c,f=c.foe;G.notes=[];G.spoils=[];
@@ -825,7 +856,7 @@ function win(){
 }
 function lose(){if(G.screen==='dead')return;G.screen='dead';render()}
 function makeShop(){
-  const opts=[...Object.keys(CONSUM).map(id=>({kind:'item',id})),...Object.keys(CHARMS).filter(id=>!G.bag.charms.includes(id)&&id!=='lantern').map(id=>({kind:'charm',id}))];
+  const opts=[...Object.keys(CONSUM).map(id=>({kind:'item',id})),...Object.keys(CHARMS).filter(id=>!owns('charm',id)&&id!=='lantern').map(id=>({kind:'charm',id}))];
   G.shop=shuffle(opts).slice(0,3).map(o=>({...o,sold:false}));
 }
 
@@ -842,7 +873,7 @@ const linksText=l=>`Links in deck: ${l.flow} flow · ${l.rv} reversal · ${l.mr}
 const GRAY=[0,1,3,2,6,7,5,4]; // 3-bit Gray order: neighbours in the grid differ by one line
 const TRIG={7:['☰','Heaven'],0:['☷','Earth'],1:['☳','Thunder'],2:['☵','Water'],4:['☶','Mountain'],6:['☴','Wind'],5:['☲','Fire'],3:['☱','Lake']};
 function deckCounts(){
-  const m=new Map(),w=WEAPONS[G.bag.weapon];
+  const m=new Map(),w=WEAPONS[wId()];
   const add=(hex,name,k=1)=>{const b=BITS[hex];if(!m.has(b))m.set(b,{n:0,cards:[]});const e=m.get(b);e.n+=k;e.cards.push(k>1?name+' ×'+k:name)};
   G.deck.forEach(d=>add(d.hex,CARDS[d.id].name));
   if(w)add(CARDS[w.sig].hex,CARDS[w.sig].name+' (weapon)',2);
@@ -988,19 +1019,19 @@ function renderCombat(){
   if(sel){const b=BITS[sel.hex];tr=classify(c.stance,b);chg=c.stance^b;info=trInfo(tr,sel);
     let q=c.qi-effCost(sel,tr);
     const sd=CARDS[sel.id];
-    if(tr.type==='flow'){if(lineFx(tr.line,tr.dir).name==='Surge')q++;if(G.bag.weapon==='hooks'&&!c.hookUsed)q++;q+=sd.fbQi||0}
+    if(tr.type==='flow'){if(lineFx(tr.line,tr.dir).name==='Surge')q++;if(wId()==='hooks'&&!c.hookUsed)q++;q+=sd.fbQi||0}
     if(sel.id==='decrease')q++;
     nx={bits:b,qi:q,disc:tr.type==='flow'&&sel.id==='before'?1:0}}
   const stanceNum=NUM[c.stance];
   const qiPips=Array.from({length:Math.max(3,c.qi)},(_,i)=>`<i class="${i<c.qi?'f':''}"></i>`).join('');
   const balPct=50+c.balance/12*50;
   const foeChips=[f.block?`<span class="chip blk">Block ${f.block}</span>`:'',f.str?`<span class="chip str">Str ${f.str}</span>`:'',f.burn?`<span class="chip burn">Burn ${f.burn}</span>`:''].join('');
-  const w=WEAPONS[G.bag.weapon];
+  const w=WEAPONS[wId()];
 
   let pv;
   if(UI.shift)pv=`<div class="hint">Tap one line of your stance to flip it. Costs 1 Qi, once per turn. Shifting counts toward Forms. <button class="btn small" data-act="shift">Cancel</button></div>`;
   else if(UI.item!=null){
-    const id=G.bag.items[UI.item],it=CONSUM[id];
+    const id=G.bag.belt[UI.item].id,it=CONSUM[id];
     pv=`<div class="pvart" style="display:grid;place-items:center">${itemOrb(it.zh,it.col,'big')}</div><div class="pv"><div class="pv-head"><b>${it.name}</b></div><div class="pv-text">${it.desc}</div>
       <div class="pv-row"><span class="mute" style="font-size:13px">Consumable · free</span><button class="btn primary" data-act="use" ${c.busy?'disabled':''}>Use</button></div></div>`;
   }else if(sel){
@@ -1017,7 +1048,7 @@ function renderCombat(){
       <div class="pv-row"><span class="mute" style="font-size:13px">${cost} Qi${cost!==costOf(sel)?` (base ${costOf(sel)})`:''} · leaves ${Math.max(0,nx.qi)} Qi. Other cards show their cost after this one.</span><button class="btn primary" data-act="play" ${can?'':'disabled'}>${c.qi<cost?'Not enough Qi':'Play'}</button></div></div>`;
   }else pv=`<div class="hint">${c.log||'Tap a technique to see how it moves from your stance.'}</div>`;
 
-  const pouch=[0,1,2].map(i=>{const id=G.bag.items[i];if(!id)return `<span class="itm empty"></span>`;const it=CONSUM[id];
+  const pouch=[0,1,2].map(i=>{const id=G.bag.belt[i]&&G.bag.belt[i].id;if(!id)return `<span class="itm empty"></span>`;const it=CONSUM[id];
     return `<button class="itm ${UI.item===i?'sel':''}" style="--ic:${it.col}" data-act="item" data-i="${i}" aria-label="${it.name}"><span class="zh">${it.zh}</span></button>`}).join('');
 
   return `${topHTML()}
@@ -1031,7 +1062,7 @@ function renderCombat(){
       <div class="intent ${f.interrupted?'cut':''}"><span class="k">Next</span><span class="w">${intentIcon(m)} ${intentText(m,f)}</span>${f.interrupted?'<span class="chip good">Interrupted</span>':''}</div>
       <div class="fst" title="Stance ${he(m.hex)}">${hexHTML(fb,'sm')}<span class="zh">${hz(m.hex)}</span><span>· interrupt:</span><b><span class="zh">${hz(comp)}</span> ${he(comp)}</b></div>
     </div>
-    <div class="sprite hero" id="heroSpr">${fighter(LOOKS.hero,G.bag.weapon)}</div>
+    <div class="sprite hero" id="heroSpr">${fighter(LOOKS.hero,wId())}</div>
     <div class="info herobox">
       <div class="nm"><b>The Wanderer</b><small>${w?w.zh+' '+w.name:'拳 Bare hands'}</small></div>
       <div class="hpb"><div class="bar me"><b style="width:${G.hp/maxHp()*100}%"></b></div><span>${G.hp}/${maxHp()}</span></div>
@@ -1092,9 +1123,9 @@ function renderReward(){
 function renderRest(){
   const next=FOES[G.fight];
   const shop=G.shop.map((s,i)=>{const it=s.kind==='item'?CONSUM[s.id]:CHARMS[s.id];
-    const full=s.kind==='item'&&G.bag.items.length>=3;
+    const full=!canHold({kind:s.kind,id:s.id});
     return `<div class="itemrow">${itemOrb(it.zh,it.col)}<div class="d"><b>${it.name}</b><span>${s.kind==='charm'?'Talisman · ':''}${it.desc}</span></div>
-      <button class="btn small" data-act="buy" data-i="${i}" ${s.sold||G.taels<it.price||full?'disabled':''}>${s.sold?'Sold':full?'Pouch full':it.price+' 兩'}</button></div>`}).join('');
+      <button class="btn small" data-act="buy" data-i="${i}" ${s.sold||G.taels<it.price||full?'disabled':''}>${s.sold?'Sold':full?'Bag full':it.price+' 兩'}</button></div>`}).join('');
   return `${topHTML()}<div class="screen">
     <h2>A hermitage on the mountain road</h2>
     <p>Health ${G.hp} / ${maxHp()}. Next: ${next.name} of the ${next.school}.</p>
@@ -1129,24 +1160,128 @@ function renderEnd(){
   return `<div class="screen">
     <div class="titlehead"><div class="seal zh" style="font-size:36px">${won?'既濟':'未濟'}</div><div><h1>${won?'After Completion':'Before Completion'}</h1>
     <p class="mute">${won?'The Master of Changes lowers their sword. The jianghu will speak your name.':`You fell to ${G.c.foe.name} of the ${G.c.foe.school}. Every ending is the start of another change.`}</p></div></div>
-    <div class="hero-card"><div class="bg">${backdrop(won?3:G.fight)}</div><div class="sprite hero" style="left:34%;width:30%">${fighter(LOOKS.hero,G.bag.weapon)}</div></div>
+    <div class="hero-card"><div class="bg">${backdrop(won?3:G.fight)}</div><div class="sprite hero" style="left:34%;width:30%">${fighter(LOOKS.hero,wId())}</div></div>
     ${G.notes.map(n=>`<div class="note">${n}</div>`).join('')}
-    <p>Forms mastered: ${G.mastered.size?[...G.mastered].map(id=>FORMS.find(f=>f.id===id).name).join(', '):'none'}. Deck size ${G.deck.length}. Weapons carried: ${G.bag.weapons.map(w=>WEAPONS[w].name).join(', ')}.</p>
+    <p>Forms mastered: ${G.mastered.size?[...G.mastered].map(id=>FORMS.find(f=>f.id===id).name).join(', '):'none'}. Deck size ${G.deck.length}. Weapons carried: ${ownedWeapons().map(w=>WEAPONS[w].name).join(', ')}.</p>
     <div><button class="btn primary" data-act="arms">Walk the road again</button></div></div>`;
 }
 
 /* ======================= Modals ======================= */
-function renderBag(){
-  const b=G.bag,canSwap=G.screen!=='combat';
-  const wp=b.weapons.map(id=>weaponTile(id,{sel:b.weapon===id,extra:`<div style="padding:0 4px">${b.weapon===id?'<span class="chip gold">Equipped</span>':canSwap?`<button class="btn small" data-act="equip" data-i="${id}">Equip</button>`:''}</div>`})).join('');
-  const ch=b.charms.length?b.charms.map(id=>{const t=CHARMS[id];return `<div class="itemrow">${itemOrb(t.zh,t.col)}<div class="d"><b>${t.name}</b><span>${t.desc}</span></div>
-    ${b.charm===id?(canSwap?`<button class="btn small on" data-act="charm" data-i="">Remove</button>`:'<span class="chip gold">Worn</span>'):canSwap?`<button class="btn small" data-act="charm" data-i="${id}">Wear</button>`:''}</div>`}).join(''):'<p class="mute">No talismans yet. Merchants and some masters carry them.</p>';
-  const it=[0,1,2].map(i=>{const id=b.items[i];if(!id)return `<div class="itemrow">${itemOrb('',`#555`,'empty')}<div class="d"><span>Empty slot</span></div></div>`;const t=CONSUM[id];
-    const usable=G.screen==='combat'?!G.c.busy:!t.combat;
-    return `<div class="itemrow">${itemOrb(t.zh,t.col)}<div class="d"><b>${t.name}</b><span>${t.desc}${t.combat?' In duels only.':''}</span></div>${usable?`<button class="btn small" data-act="bagUse" data-i="${i}">Use</button>`:''}</div>`}).join('');
-  return `<div class="bagtop"><div class="mini">${fighter(LOOKS.hero,b.weapon)}</div><div><h3>The Wanderer's bag</h3><p class="mute">Health ${G.hp}/${maxHp()} · ${G.taels} taels${canSwap?'':' · weapons and talismans can only be changed between duels'}</p></div></div>
-    <h4>Weapons</h4><div class="wgrid">${wp}</div><h4>Talisman (wear one)</h4><div class="choice">${ch}</div><h4>Pouch (3 slots)</h4><div class="choice">${it}</div>`;
+/* ---- Inventory (Diablo-style grid) ---- */
+const GW=10,GH=4;
+const ISIZE={weapon:{jian:[1,3],dao:[2,3],spear:[1,4],fan:[2,2],staff:[1,4],hooks:[2,3]},charm:{jade:[1,1],bagua:[1,1],lantern:[1,2],shell:[2,2]}};
+const isize=o=>o.kind==='item'?[1,1]:ISIZE[o.kind][o.id];
+const itemDef=o=>o.kind==='weapon'?WEAPONS[o.id]:o.kind==='charm'?CHARMS[o.id]:CONSUM[o.id];
+const owns=(kind,id)=>{const b=G.bag;return (b.eqW&&b.eqW.kind===kind&&b.eqW.id===id)||(b.eqC&&b.eqC.kind===kind&&b.eqC.id===id)||b.grid.some(o=>o.kind===kind&&o.id===id)||b.belt.some(o=>o&&o.kind===kind&&o.id===id)};
+const ownedWeapons=()=>[...(G.bag.eqW?[G.bag.eqW.id]:[]),...G.bag.grid.filter(o=>o.kind==='weapon').map(o=>o.id)];
+function fits(o,x,y,ignore){
+  const [w,h]=isize(o);if(x<0||y<0||x+w>GW||y+h>GH)return false;
+  return !G.bag.grid.some(g=>{if(g.uid===ignore)return false;const [gw,gh]=isize(g);return x<g.x+gw&&g.x<x+w&&y<g.y+gh&&g.y<y+h});
 }
+function findSpot(o,ignore){for(let x=0;x<GW;x++)for(let y=0;y<GH;y++)if(fits(o,x,y,ignore))return[x,y];return null}
+const canHold=o=>o.kind==='item'&&G.bag.belt.includes(null)||!!findSpot(o);
+function invGet(src){const b=G.bag;
+  if(src==='eqW')return b.eqW;if(src==='eqC')return b.eqC;
+  if(src.startsWith('belt:'))return b.belt[+src.slice(5)];
+  if(src.startsWith('grid:'))return b.grid.find(g=>g.uid===src.slice(5));return null}
+function invRemove(src){const b=G.bag;
+  if(src==='eqW')b.eqW=null;else if(src==='eqC')b.eqC=null;
+  else if(src.startsWith('belt:'))b.belt[+src.slice(5)]=null;
+  else if(src.startsWith('grid:')){const u=src.slice(5);b.grid=b.grid.filter(g=>g.uid!==u)}}
+const accepts=(t,o)=>t==='eqW'?o.kind==='weapon':t==='eqC'?o.kind==='charm':t.startsWith('belt:')?o.kind==='item':true;
+const lockedSlot=t=>G.screen==='combat'&&(t==='eqW'||t==='eqC');
+function putAt(o,t,x,y){const b=G.bag;const {x:_x,y:_y,...clean}=o;
+  if(t==='eqW')b.eqW=clean;else if(t==='eqC')b.eqC=clean;else if(t.startsWith('belt:'))b.belt[+t.slice(5)]=clean;
+  else{if(!fits(clean,x,y))return false;b.grid.push({...clean,x,y})}return true}
+// move the held item to a target; one item in the way is swapped back to where the held item came from
+function invMove(src,t,x,y){
+  const o=invGet(src);if(!o)return 'That item is gone.';
+  if(!accepts(t,o))return t==='eqW'?'Only weapons go in the weapon slot.':t==='eqC'?'Only talismans go in the talisman slot.':'Only consumables go on the belt.';
+  if(lockedSlot(src)||lockedSlot(t))return 'Weapons and talismans can only be changed between duels.';
+  const snap=JSON.stringify(G.bag),old={x:o.x,y:o.y};
+  let other=null,otherSrc=null;
+  if(t==='grid'){const [w,h]=isize(o);x=Math.min(x,GW-w);y=Math.min(y,GH-h);
+    const hit=G.bag.grid.filter(g=>{if(g.uid===o.uid)return false;const [gw,gh]=isize(g);return x<g.x+gw&&g.x<x+w&&y<g.y+gh&&g.y<y+h});
+    if(hit.length>1)return 'Too many items in the way.';if(hit.length){other=hit[0];otherSrc='grid:'+other.uid}}
+  else{other=invGet(t);otherSrc=t}
+  invRemove(src);if(other)invRemove(otherSrc);
+  let ok=putAt(o,t,x,y);
+  if(ok&&other){
+    if(accepts(src,other)&&!src.startsWith('grid:'))ok=putAt(other,src);
+    else if(src.startsWith('grid:')&&fits(other,old.x,old.y))ok=putAt(other,'grid',old.x,old.y);
+    else{const sp=findSpot(other);ok=!!sp&&putAt(other,'grid',sp[0],sp[1])}
+  }
+  if(!ok){G.bag=JSON.parse(snap);return 'There is no room for that.'}
+  G.hp=Math.min(G.hp,maxHp());return null;
+}
+const IC={blade:'#e8edf0',edge:'#8d949a',wood:'#8a6a4a',grip:'#3a2a1c'};
+const ICON={
+  jian:`<path d="M5 1.5 L5 20" stroke="${IC.blade}" stroke-width="1.6"/><path d="M5 1.5 L5 20" stroke="${IC.edge}" stroke-width=".35"/><path d="M1.6 20.4 H8.4" stroke="${GOLD}" stroke-width="1.5"/><path d="M5 21 V27" stroke="${IC.grip}" stroke-width="1.9"/><circle cx="5" cy="27.8" r="1.1" fill="${GOLD}"/><path d="M5 28.6 Q3 29.5 3.4 29.8 M5 28.6 Q6.6 29.5 6.3 29.9" stroke="${RED}" stroke-width=".7"/>`,
+  dao:`<path d="M8 21 Q3 10 15.5 2 Q14.5 11 12 21Z" fill="${IC.blade}" stroke="${IC.edge}" stroke-width=".4"/><circle cx="10" cy="22.4" r="1.9" fill="none" stroke="${GOLD}" stroke-width="1"/><path d="M10 24.2 L9 29" stroke="${IC.grip}" stroke-width="2"/><path d="M9.2 28.2 Q5 29.4 3.6 27.4" stroke="${RED}" stroke-width=".8" fill="none"/>`,
+  spear:`<path d="M5 9 V39" stroke="${IC.wood}" stroke-width="1.4"/><path d="M5 1 L7 8.5 L3 8.5Z" fill="${IC.blade}" stroke="${IC.edge}" stroke-width=".3"/><path d="M5 9 Q2 12 2.8 15.5 M5 9 Q8 12 7.2 15.5 M5 9 V15.5" stroke="${RED}" stroke-width=".9" fill="none"/>`,
+  staff:`<path d="M5 1.5 V38.5" stroke="${IC.wood}" stroke-width="2.2"/><path d="M3.6 5 H6.4 M3.6 35 H6.4" stroke="${GOLD}" stroke-width="2"/>`,
+  fan:`<path d="M10 17.5 L1.6 9 A11.8 11.8 0 0 1 18.4 9Z" fill="#f3ecde" stroke="#5a4a3a" stroke-width=".5"/><path d="M10 17.5 L5 5 M10 17.5 L10 3.4 M10 17.5 L15 5" stroke="#5a4a3a" stroke-width=".3"/><circle cx="12.4" cy="8" r="1.8" fill="${RED}"/><circle cx="10" cy="17.5" r=".9" fill="${GOLD}"/>`,
+  hooks:`<path d="M5.5 28 V9 Q5.5 3 10 3.4 Q12 5 9.2 7" stroke="${IC.blade}" stroke-width="1.3" fill="none"/><path d="M14.5 28 V9 Q14.5 3 19 3.4 Q20 5.6 17.6 7" stroke="${IC.blade}" stroke-width="1.3" fill="none"/><path d="M3.4 21 Q5.5 23 7.6 21 M12.4 21 Q14.5 23 16.6 21" stroke="${GOLD}" stroke-width=".9" fill="none"/>`,
+  jade:`<path d="M5 .6 V2.4" stroke="${RED}" stroke-width=".7"/><circle cx="5" cy="5.6" r="3.4" fill="#7fb89a"/><circle cx="5" cy="5.6" r="1.1" fill="#221c18"/><path d="M3.2 4.2 A2.4 2.4 0 0 1 5.6 3.2" stroke="#d6eee0" stroke-width=".4" fill="none"/>`,
+  bagua:`<path d="M3.6 1.6 H6.4 L8.4 3.6 V6.4 L6.4 8.4 H3.6 L1.6 6.4 V3.6Z" fill="#b9a46a" stroke="${GOLD}" stroke-width=".4"/><circle cx="5" cy="5" r="1.8" fill="#dfe6ea"/>`,
+  lantern:`<path d="M5 .4 V3" stroke="#c9b89a" stroke-width=".4"/><rect x="3" y="3" width="4" height="1.2" fill="#2a1d16"/><ellipse cx="5" cy="10" rx="3.7" ry="5.6" fill="${RED}"/><path d="M5 4.6 V15.4 M2.4 10 H7.6" stroke="#7a2018" stroke-width=".3"/><rect x="3" y="15.6" width="4" height="1.1" fill="#2a1d16"/><path d="M5 16.8 V19.6" stroke="${GOLD}" stroke-width=".8"/>`,
+  shell:`<ellipse cx="10" cy="11" rx="7.6" ry="6.6" fill="#6f7a5a" stroke="#3a4030" stroke-width=".5"/><path d="M10 6.6 L12.6 8.4 L12.6 11.6 L10 13.4 L7.4 11.6 L7.4 8.4Z M10 4.4 V6.6 M12.6 8.4 L16 7 M12.6 11.6 L16.4 13.4 M10 13.4 V17.6 M7.4 11.6 L3.6 13.4 M7.4 8.4 L4 7" stroke="#b9c39a" stroke-width=".45" fill="none"/><circle cx="10" cy="3.2" r="1.3" fill="#6f7a5a"/>`,
+  qipill:`<circle cx="5" cy="5.4" r="2.8" fill="${GOLD}"/><circle cx="4.1" cy="4.5" r=".8" fill="#f3e2b4"/><path d="M1.6 8.8 Q5 10 8.4 8.8" stroke="#8a6a4a" stroke-width=".5" fill="none"/>`,
+  balm:`<rect x="2.3" y="3.6" width="5.4" height="5" rx="1.2" fill="#4f7d6a"/><rect x="2.8" y="2" width="4.4" height="1.8" rx=".6" fill="#3a2a1c"/><rect x="3.4" y="5" width="3.2" height="2.2" fill="#e9dfc8"/>`,
+  talisman:`<rect x="3" y=".8" width="4" height="8.4" fill="#e9d38a"/><path d="M5 1.8 Q3.8 3 5 4 Q6.2 5 5 6 Q3.8 7 5 8.2" stroke="${RED}" stroke-width=".55" fill="none"/>`,
+  incense:`<path d="M3 9.4 L4.4 3 M5 9.4 V3 M7 9.4 L5.6 3" stroke="#8a5a3a" stroke-width=".5"/><circle cx="5" cy="2.6" r=".5" fill="${RED}"/><path d="M5 2.2 Q3.6 1.4 5 .8 Q6.4 .2 5.4 -.6" stroke="#c9c2b6" stroke-width=".4" fill="none"/>`,
+};
+function iconSVG(o){const [w,h]=isize(o);return `<svg viewBox="0 0 ${w*10} ${h*10}" preserveAspectRatio="xMidYMid meet" stroke-linecap="round" aria-hidden="true">${ICON[o.id]||''}</svg>`}
+function slotHTML(t,o,label,cls){
+  const held=UI.held===t,h=UI.held?invGet(UI.held):null;
+  const can=h&&!held&&accepts(t,h)&&!lockedSlot(t)&&!lockedSlot(UI.held);
+  return `<button class="slot ${cls} ${held?'held':''} ${can?'can':''} ${lockedSlot(t)?'locked':''}" data-act="islot" data-i="${t}" aria-label="${o?itemDef(o).name:label}">${o?iconSVG(o):`<span>${label}</span>`}</button>`;
+}
+function renderBag(){
+  const b=G.bag,inC=G.screen==='combat',h=UI.held?invGet(UI.held):null;
+  if(UI.held&&!h)UI.held=null;
+  let cells='';for(let y=0;y<GH;y++)for(let x=0;x<GW;x++)cells+=`<button class="icell" style="grid-column:${x+1};grid-row:${y+1}" data-act="icell" data-i="${x},${y}" aria-label="Space ${x+1},${y+1}"></button>`;
+  const items=b.grid.map(o=>{const [w,hh]=isize(o);return `<button class="gitem ${UI.held==='grid:'+o.uid?'held':''}" style="grid-column:${o.x+1}/span ${w};grid-row:${o.y+1}/span ${hh}" data-act="islot" data-i="grid:${o.uid}" aria-label="${itemDef(o).name}">${iconSVG(o)}</button>`}).join('');
+  const belt=[0,1,2].map(i=>slotHTML('belt:'+i,b.belt[i],'','bslot')).join('');
+  let info=`<p class="mute">Tap an item to pick it up, then tap where it should go: a space in the bag, the weapon or talisman slot, or the belt. Dropping it on one item swaps them.${inC?' During a duel your weapon and talisman are locked, but you can rearrange the bag and belt.':''}</p>`;
+  if(h){const d=itemDef(h),[w,hh]=isize(h),src=UI.held;
+    const kind=h.kind==='weapon'?'Weapon':h.kind==='charm'?'Talisman':'Consumable';
+    const btns=[];
+    if(h.kind==='weapon'&&src!=='eqW'&&!inC)btns.push(`<button class="btn small primary" data-act="iquick" data-i="eqW">Equip</button>`);
+    if(h.kind==='charm'&&src!=='eqC'&&!inC)btns.push(`<button class="btn small primary" data-act="iquick" data-i="eqC">Wear</button>`);
+    if((src==='eqW'||src==='eqC')&&!inC)btns.push(`<button class="btn small" data-act="iquick" data-i="grid">Take off</button>`);
+    if(h.kind==='item'&&!src.startsWith('belt:')&&b.belt.includes(null))btns.push(`<button class="btn small" data-act="iquick" data-i="belt">To belt</button>`);
+    if(h.kind==='item'&&(inC?!G.c.busy:!d.combat))btns.push(`<button class="btn small primary" data-act="iuse">Use</button>`);
+    btns.push(`<button class="btn small" data-act="icancel">Put down</button>`);
+    info=`<div class="iinfo-h"><span class="zh">${d.zh}</span><div><b>${d.name}</b><small>${kind} · ${w}×${hh}${src==='eqW'||src==='eqC'?' · equipped':''}</small></div></div>
+      <p>${d.desc}${h.kind==='item'&&d.combat?' Only in duels.':''}</p>
+      ${h.kind==='weapon'?`<p class="mute">Adds 2× ${CARDS[d.sig].name}: ${CARDS[d.sig].text} <b style="color:var(--jade)">Flow:</b> ${CARDS[d.sig].flow}</p>`:''}
+      <div class="chips" style="gap:6px">${btns.join('')}</div>`}
+  const w=WEAPONS[wId()],c=cId()&&CHARMS[cId()];
+  return `<h3>The Wanderer's bag</h3>
+  <div class="chest">
+    <div class="doll">
+      ${slotHTML('eqW',b.eqW,'Weapon','wslot')}
+      <div class="dollfig">${fighter(LOOKS.hero,wId())}</div>
+      <div class="dollside">${slotHTML('eqC',b.eqC,'Talisman','cslot')}<div class="gold">${G.taels} 兩</div><div class="hp">${G.hp}/${maxHp()} HP</div></div>
+    </div>
+    <div class="beltrow"><span>Belt</span><div class="belt">${belt}</div></div>
+    <div class="igrid ${UI.held?'holding':''}">${cells}${items}</div>
+  </div>
+  <div class="iinfo">${info}</div>
+  <div class="mute" style="font-size:13px">Equipped: ${w?`<b>${w.name}</b> (${w.desc})`:'<b>Bare hands</b> (draw 1 extra card each turn)'}${c?` · <b>${c.name}</b> (${c.desc})`:''}</div>
+  ${UI.invMsg?`<div class="note">${UI.invMsg}</div>`:''}`;
+}
+function bagPreview(e){
+  const g=$modal.querySelector('.igrid');if(!g)return;
+  g.querySelectorAll('.icell.ok,.icell.bad').forEach(c=>c.classList.remove('ok','bad'));
+  const cell=e.target.closest&&e.target.closest('.icell');if(!cell||!UI.held)return;
+  const o=invGet(UI.held);if(!o)return;const [w,h]=isize(o);let [x,y]=cell.dataset.i.split(',').map(Number);x=Math.min(x,GW-w);y=Math.min(y,GH-h);
+  const hit=G.bag.grid.filter(q=>{if(q.uid===o.uid)return false;const [qw,qh]=isize(q);return x<q.x+qw&&q.x<x+w&&y<q.y+qh&&q.y<y+h}).length;
+  const cls=hit>1?'bad':'ok';
+  g.querySelectorAll('.icell').forEach(c=>{const [cx,cy]=c.dataset.i.split(',').map(Number);if(cx>=x&&cx<x+w&&cy>=y&&cy<y+h)c.classList.add(cls)});
+}
+document.addEventListener('mouseover',e=>{if(UI.modal==='bag')bagPreview(e)});
 function renderModal(){
   if(!UI.modal){$modal.innerHTML='';return}
   let body='';
@@ -1175,7 +1310,7 @@ function renderModal(){
       <div class="seq">${f.seq.map((n,i)=>`${i?'<span class="mute">→</span>':''}<div class="step">${hexHTML(BITS[n],'')}<span class="zh">${hz(n)}</span><span>${he(n)}</span></div>`).join('')}
       <span class="mute">⇒</span><div class="step" style="width:84px">${art(f.card,CARDS[f.card].hex,'art')}<span>${CARDS[f.card].name}</span></div></div>
       <span class="mute" style="font-size:14px">${f.lore} ${CARDS[f.card].text}</span></div>`).join('')}`;
-  else if(UI.modal==='deck'){const w=WEAPONS[G.bag.weapon],tab=UI.deckTab||'cards';
+  else if(UI.modal==='deck'){const w=WEAPONS[wId()],tab=UI.deckTab||'cards';
     body=`<h3>Your techniques (${G.deck.length}${w?' + 2 weapon':''})</h3>
     <div class="tabs"><button class="btn small ${tab==='cards'?'on':''}" data-act="dtab" data-i="cards">Cards</button><button class="btn small ${tab==='map'?'on':''}" data-act="dtab" data-i="map">Map of Changes</button></div>`+(tab==='map'?renderMap():`<div class="bigcards">${G.deck.map(d=>bigCard(d,{links:links(BITS[d.hex],d.uid)})).join('')}${w?bigCard({id:w.sig,hex:CARDS[w.sig].hex,sig:true}):''}</div>`)}
   else if(UI.modal==='bag')body=renderBag();
@@ -1191,7 +1326,7 @@ document.addEventListener('click',e=>{
   const act=el.dataset.act,i=el.dataset.i!=null?el.dataset.i:null;
   if(act.startsWith('m:')){UI.modal=act.slice(2);return renderModal()}
   switch(act){
-    case 'close':UI.modal=null;return renderModal();
+    case 'close':UI.modal=null;UI.held=null;UI.invMsg=null;return renderModal();
     case 'dtab':UI.deckTab=i;return renderModal();
     case 'msel':{const b=+i;UI.mapSel=UI.mapSel===b?null:b;const y=$modal.querySelector('.modal').scrollTop;renderModal();const mm=$modal.querySelector('.modal');if(mm)mm.scrollTop=y;return}
     case 'mapcmp':UI.modal='deck';UI.deckTab='map';UI.mapSel=BITS[CARDS[G.reward[0]].hex];return renderModal();
@@ -1200,9 +1335,8 @@ document.addEventListener('click',e=>{
     case 'go':return newGame(UI.arm);
     case 'sel':{const k=+i;if(G.c.busy)return;UI.shift=false;UI.item=null;if(UI.sel===k)return play(k);UI.sel=k;return render()}
     case 'play':if(UI.sel!=null)play(UI.sel);return;
-    case 'item':{const k=+i;UI.sel=null;UI.shift=false;const id=G.bag.items[k];if(!CONSUM[id].combat&&id!=='balm')return;UI.item=UI.item===k?null:k;return render()}
-    case 'use':if(UI.item!=null)useItem(UI.item);return;
-    case 'bagUse':useItem(+i);UI.modal='bag';return render();
+    case 'item':{const k=+i;UI.sel=null;UI.shift=false;const o=G.bag.belt[k];if(!o)return;const id=o.id;if(!CONSUM[id].combat&&id!=='balm')return;UI.item=UI.item===k?null:k;return render()}
+    case 'use':if(UI.item!=null)useItem('belt:'+UI.item);return;
     case 'end':return endTurn();
     case 'shift':UI.shift=!UI.shift;UI.sel=null;UI.item=null;return render();
     case 'shiftline':return shiftLine(+i);
@@ -1213,8 +1347,18 @@ document.addEventListener('click',e=>{
     case 'csel':UI.cult=+i;UI.cultLine=null;return render();
     case 'cline':UI.cultLine=+i;return render();
     case 'cultok':{const d=G.deck.find(x=>x.uid===UI.cult);d.hex=NUM[BITS[d.hex]^(1<<UI.cultLine)];d.cult=true;return startCombat()}
-    case 'equip':G.bag.weapon=i;return render();
-    case 'charm':G.bag.charm=i||null;G.hp=Math.min(G.hp,maxHp());return render();
+    case 'islot':{UI.invMsg=null;
+      if(UI.held&&UI.held!==i){const t=i.startsWith('grid:')?null:i;
+        if(t){const err=invMove(UI.held,t);UI.invMsg=err;if(!err)UI.held=null;return render()}}
+      UI.held=UI.held===i?null:(invGet(i)?i:null);return render()}
+    case 'icell':{UI.invMsg=null;if(!UI.held)return;const [x,y]=i.split(',').map(Number);const err=invMove(UI.held,'grid',x,y);UI.invMsg=err;if(!err)UI.held=null;return render()}
+    case 'iquick':{UI.invMsg=null;const o=invGet(UI.held);if(!o)return;let err;
+      if(i==='grid'){const sp=findSpot(o);err=sp?invMove(UI.held,'grid',sp[0],sp[1]):'There is no room in your bag.'}
+      else if(i==='belt'){const k=G.bag.belt.indexOf(null);err=k<0?'Your belt is full.':invMove(UI.held,'belt:'+k)}
+      else err=invMove(UI.held,i);
+      UI.invMsg=err;if(!err)UI.held=null;return render()}
+    case 'iuse':{const src=UI.held;useItem(src);UI.modal='bag';return render()}
+    case 'icancel':UI.held=null;UI.invMsg=null;return render();
     case 'buy':{const s=G.shop[+i],it=s.kind==='item'?CONSUM[s.id]:CHARMS[s.id];if(s.sold||G.taels<it.price)return;G.taels-=it.price;grant(s.kind,s.id);s.sold=true;return render()}
   }
 });
